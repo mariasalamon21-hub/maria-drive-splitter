@@ -193,7 +193,7 @@ button:disabled{
 <h1>Maria Drive Splitter</h1>
 
 <div class="subtitle">
-Compress your file into a real 7z archive, split it, and upload the parts.
+Split your original file directly into parts and upload them to Google Drive.
 </div>
 
 <div class="card">
@@ -235,7 +235,7 @@ Click here or drag a file here
 </div>
 
 <button id="startButton" class="primary" disabled>
-Compress & Split
+Split File
 </button>
 
 <div id="progress" class="progress-container">
@@ -405,18 +405,6 @@ function formatBytes(bytes){
 }
 
 
-function getBaseName(name){
-
-    const dot =
-    name.lastIndexOf(".");
-
-    return dot === -1
-        ? name
-        : name.substring(0,dot);
-
-}
-
-
 function sleep(ms){
 
     return new Promise(
@@ -453,6 +441,25 @@ function setProgress(percent,text){
 }
 
 
+function setUploadProgress(percent,text){
+
+    uploadProgress.style.display = "block";
+
+    uploadFill.style.width =
+    Math.min(
+        100,
+        Math.max(0,percent)
+    ) + "%";
+
+    uploadText.textContent = text;
+
+}
+
+
+/* =====================================================
+   SIZE CONVERSION
+   ===================================================== */
+
 function convertToBytes(){
 
     const value =
@@ -485,7 +492,23 @@ function convertToBytes(){
 
     };
 
-    return value * multiplier[sizeUnit.value];
+    const bytes =
+    value * multiplier[sizeUnit.value];
+
+
+    if(
+        !Number.isFinite(bytes) ||
+        bytes < 1
+    ){
+
+        throw new Error(
+            "Part size must be at least 1 Byte."
+        );
+
+    }
+
+
+    return Math.floor(bytes);
 
 }
 
@@ -493,6 +516,34 @@ function convertToBytes(){
 /* =====================================================
    FILE PICKER
    ===================================================== */
+
+function selectFile(file){
+
+    if(!file){
+
+        return;
+
+    }
+
+    selectedFile = file;
+
+    fileName.textContent =
+    selectedFile.name +
+    " — " +
+    formatBytes(selectedFile.size);
+
+    startButton.disabled = false;
+
+    parts = [];
+
+    partsList.innerHTML = "";
+
+    partsCard.classList.add("hidden");
+
+    setStatus("");
+
+}
+
 
 dropZone.onclick = () => {
 
@@ -505,15 +556,9 @@ fileInput.onchange = () => {
 
     if(fileInput.files.length){
 
-        selectedFile =
-        fileInput.files[0];
-
-        fileName.textContent =
-        selectedFile.name +
-        " — " +
-        formatBytes(selectedFile.size);
-
-        startButton.disabled = false;
+        selectFile(
+            fileInput.files[0]
+        );
 
     }
 
@@ -533,15 +578,9 @@ dropZone.ondrop = e => {
 
     if(e.dataTransfer.files.length){
 
-        selectedFile =
-        e.dataTransfer.files[0];
-
-        fileName.textContent =
-        selectedFile.name +
-        " — " +
-        formatBytes(selectedFile.size);
-
-        startButton.disabled = false;
+        selectFile(
+            e.dataTransfer.files[0]
+        );
 
     }
 
@@ -549,253 +588,11 @@ dropZone.ondrop = e => {
 
 
 /* =====================================================
-   LOAD REAL 7-ZIP WASM
+   DIRECT FILE SPLITTING
    ===================================================== */
 
-let sevenZipModule = null;
-
-async function load7Zip(){
-
-    if(sevenZipModule){
-
-        return sevenZipModule;
-
-    }
-
-    setProgress(
-        5,
-        "Loading 7-Zip..."
-    );
-
-
-    /*
-       Official 7z-wasm UMD build.
-
-       Version 1.2.0 contains:
-       7zz.umd.js
-       7zz.wasm
-    */
-
-    if(
-        typeof window.SevenZip ===
-        "undefined"
-    ){
-
-        await new Promise(
-            (resolve,reject) => {
-
-                const script =
-                document.createElement("script");
-
-                script.src =
-                "https://unpkg.com/7z-wasm@1.2.0/7zz.umd.js";
-
-                script.onload = resolve;
-
-                script.onerror = () => {
-
-                    reject(
-                        new Error(
-                            "Could not load 7-Zip JavaScript."
-                        )
-                    );
-
-                };
-
-                document.head.appendChild(
-                    script
-                );
-
-            }
-        );
-
-    }
-
-
-    if(
-        typeof window.SevenZip !==
-        "function"
-    ){
-
-        throw new Error(
-            "7-Zip module did not initialize."
-        );
-
-    }
-
-
-    setProgress(
-        8,
-        "Initializing 7-Zip..."
-    );
-
-
-    sevenZipModule =
-    await window.SevenZip({
-
-        locateFile: function(path){
-
-            if(
-                path.endsWith(".wasm")
-            ){
-
-                return (
-                    "https://unpkg.com/7z-wasm@1.2.0/" +
-                    path
-                );
-
-            }
-
-            return path;
-
-        }
-
-    });
-
-
-    setProgress(
-        10,
-        "7-Zip loaded."
-    );
-
-
-    return sevenZipModule;
-
-}
-
-
-/* =====================================================
-   COMPRESS TO REAL 7Z
-   ===================================================== */
-
-async function compressTo7z(file){
-
-    const sz =
-    await load7Zip();
-
-
-    setProgress(
-        15,
-        "Reading selected file..."
-    );
-
-
-    const data =
-    new Uint8Array(
-        await file.arrayBuffer()
-    );
-
-
-    const inputPath =
-    "/input_" + Date.now();
-
-
-    const outputPath =
-    "/archive.7z";
-
-
-    setProgress(
-        30,
-        "Preparing 7-Zip..."
-    );
-
-
-    sz.FS.writeFile(
-        inputPath,
-        data
-    );
-
-
-    setProgress(
-        40,
-        "Compressing to real 7z..."
-    );
-
-
-    const result =
-    sz.callMain([
-
-        "a",
-
-        "-t7z",
-
-        "-mx=5",
-
-        "-m0=lzma2",
-
-        "-ms=off",
-
-        outputPath,
-
-        inputPath
-
-    ]);
-
-
-    if(result !== 0){
-
-        throw new Error(
-            "7-Zip failed. Exit code: " +
-            result
-        );
-
-    }
-
-
-    setProgress(
-        85,
-        "Reading 7z archive..."
-    );
-
-
-    const archive =
-    sz.FS.readFile(
-        outputPath
-    );
-
-
-    try{
-
-        sz.FS.unlink(
-            inputPath
-        );
-
-    }catch(e){}
-
-
-    try{
-
-        sz.FS.unlink(
-            outputPath
-        );
-
-    }catch(e){}
-
-
-    setProgress(
-        100,
-        "7z compression complete."
-    );
-
-
-    return new Blob(
-        [archive],
-        {
-            type:
-            "application/x-7z-compressed"
-        }
-    );
-
-}
-
-
-/* =====================================================
-   SPLIT 7Z
-   ===================================================== */
-
-async function split7z(
-    blob,
-    originalName,
+async function splitFile(
+    file,
     partSize
 ){
 
@@ -806,13 +603,8 @@ async function split7z(
 
     const total =
     Math.ceil(
-        blob.size / partSize
+        file.size / partSize
     );
-
-
-    const base =
-    getBaseName(originalName) +
-    ".7z";
 
 
     for(
@@ -828,14 +620,25 @@ async function split7z(
         const end =
         Math.min(
             start + partSize,
-            blob.size
+            file.size
         );
 
 
+        /*
+         * IMPORTANT:
+         * file.slice() does NOT read the
+         * whole file into memory.
+         *
+         * It creates a Blob representing
+         * only this section of the original file.
+         */
+
         const partBlob =
-        blob.slice(
+        file.slice(
             start,
-            end
+            end,
+            file.type ||
+            "application/octet-stream"
         );
 
 
@@ -847,7 +650,9 @@ async function split7z(
         parts.push({
 
             name:
-            base + "." + number,
+            file.name +
+            ".part" +
+            number,
 
             blob:
             partBlob,
@@ -864,6 +669,16 @@ async function split7z(
 
             `Creating part ${i + 1} of ${total}...`
 
+        );
+
+
+        /*
+         * Give the browser a chance
+         * to update the progress bar.
+         */
+
+        await new Promise(
+            requestAnimationFrame
         );
 
     }
@@ -996,7 +811,7 @@ function downloadBlob(
 
 
 /* =====================================================
-   START
+   START SPLITTING
    ===================================================== */
 
 startButton.onclick =
@@ -1018,6 +833,10 @@ async () => {
     );
 
 
+    progressFill.style.width =
+    "0%";
+
+
     try{
 
         const partSize =
@@ -1025,29 +844,13 @@ async () => {
 
 
         setStatus(
-            "Creating real 7z archive..."
+            "Splitting the original file..."
         );
 
 
-        const archive =
-        await compressTo7z(
-            selectedFile
-        );
+        await splitFile(
 
-
-        setStatus(
-            "7z created: " +
-            formatBytes(
-                archive.size
-            )
-        );
-
-
-        await split7z(
-
-            archive,
-
-            selectedFile.name,
+            selectedFile,
 
             partSize
 
@@ -1058,14 +861,13 @@ async () => {
 
             "Done! " +
             parts.length +
-            " parts created."
+            " parts created directly from the original file."
 
         );
 
 
         uploadButton.disabled =
         !accessToken;
-
 
     }catch(error){
 
@@ -1229,7 +1031,8 @@ async () => {
 
 
 /* =====================================================
-   GOOGLE DRIVE UPLOAD
+   GOOGLE DRIVE
+   RESUMABLE UPLOAD SESSION
    ===================================================== */
 
 async function createUploadSession(
@@ -1279,29 +1082,157 @@ async function createUploadSession(
     );
 
 
+    if(
+        response.status === 401
+    ){
+
+        throw new Error(
+            "Google authorization expired. Please reconnect Google Drive."
+        );
+
+    }
+
+
     if(!response.ok){
+
+        const text =
+        await response.text();
 
         throw new Error(
 
             "Could not create upload session: " +
-            response.status
+            response.status +
+            "\n" +
+            text
 
         );
 
     }
 
 
-    return response.headers.get(
+    const location =
+    response.headers.get(
         "Location"
     );
+
+
+    if(!location){
+
+        throw new Error(
+            "Google Drive did not return an upload URL."
+        );
+
+    }
+
+
+    return location;
 
 }
 
 
+/* =====================================================
+   GET CURRENT UPLOAD POSITION
+   ===================================================== */
+
+async function getUploadedPosition(
+    url,
+    totalSize
+){
+
+    const response =
+    await fetch(
+
+        url,
+
+        {
+
+            method:
+            "PUT",
+
+            headers: {
+
+                Authorization:
+                "Bearer " +
+                accessToken,
+
+                "Content-Range":
+                `bytes */${totalSize}`
+
+            }
+
+        }
+
+    );
+
+
+    if(
+        response.status === 308
+    ){
+
+        const range =
+        response.headers.get(
+            "Range"
+        );
+
+
+        if(range){
+
+            const match =
+            range.match(
+                /bytes=0-(\d+)/
+            );
+
+
+            if(match){
+
+                return (
+                    Number(match[1]) + 1
+                );
+
+            }
+
+        }
+
+
+        return 0;
+
+    }
+
+
+    if(
+        response.status === 200 ||
+        response.status === 201
+    ){
+
+        return totalSize;
+
+    }
+
+
+    if(
+        response.status === 404
+    ){
+
+        return 0;
+
+    }
+
+
+    return 0;
+
+}
+
+
+/* =====================================================
+   UPLOAD ONE PART
+   ===================================================== */
+
 async function uploadPart(
     part,
     index,
-    total
+    total,
+    completedBytes,
+    totalBytes
 ){
 
     const url =
@@ -1309,6 +1240,10 @@ async function uploadPart(
         part
     );
 
+
+    /*
+     * 16 MiB chunks.
+     */
 
     const chunkSize =
     16 * 1024 * 1024;
@@ -1339,33 +1274,77 @@ async function uploadPart(
         );
 
 
-        const response =
-        await fetch(
+        let response;
 
-            url,
 
-            {
+        try{
 
-                method:
-                "PUT",
+            response =
+            await fetch(
 
-                headers: {
+                url,
 
-                    "Content-Type":
-                    "application/octet-stream",
+                {
 
-                    "Content-Range":
-                    `bytes ${position}-${end - 1}/${part.size}`
+                    method:
+                    "PUT",
 
-                },
+                    headers: {
 
-                body:
-                chunk
+                        Authorization:
+                        "Bearer " +
+                        accessToken,
 
-            }
+                        "Content-Type":
+                        "application/octet-stream",
 
-        );
+                        "Content-Range":
+                        `bytes ${position}-${end - 1}/${part.size}`
 
+                    },
+
+                    body:
+                    chunk
+
+                }
+
+            );
+
+        }catch(error){
+
+            /*
+             * Network interruption.
+             * Ask Google how much was received.
+             */
+
+            await sleep(1500);
+
+            position =
+            await getUploadedPosition(
+                url,
+                part.size
+            );
+
+            continue;
+
+        }
+
+
+        if(
+            response.status === 401
+        ){
+
+            throw new Error(
+                "Google authorization expired. Please reconnect Google Drive."
+            );
+
+        }
+
+
+        /*
+         * 308 = Google received the chunk
+         * but the complete file is not finished.
+         */
 
         if(
             response.status === 308
@@ -1390,34 +1369,81 @@ async function uploadPart(
                     position =
                     Number(match[1]) + 1;
 
-                    continue;
+                }else{
+
+                    position = end;
 
                 }
+
+            }else{
+
+                position = end;
 
             }
 
 
-            position = end;
+            const overall =
+            (
+                completedBytes +
+                position
+            ) /
+            totalBytes *
+            100;
+
+
+            setUploadProgress(
+
+                overall,
+
+                `Uploading part ${index + 1} of ${total} — ${formatBytes(position)} / ${formatBytes(part.size)}`
+
+            );
+
 
             continue;
 
         }
 
 
-        if(
+        /*
+         * 200 / 201 = upload completed.
+         */
 
+        if(
             response.status === 200 ||
             response.status === 201
-
         ){
 
             position =
             part.size;
 
-            break;
+
+            const overall =
+            (
+                completedBytes +
+                part.size
+            ) /
+            totalBytes *
+            100;
+
+
+            setUploadProgress(
+
+                overall,
+
+                `Uploaded part ${index + 1} of ${total}`
+
+            );
+
+
+            continue;
 
         }
 
+
+        /*
+         * Temporary Google server errors.
+         */
 
         if(
             response.status >= 500
@@ -1425,67 +1451,30 @@ async function uploadPart(
 
             await sleep(2000);
 
+            position =
+            await getUploadedPosition(
+                url,
+                part.size
+            );
+
             continue;
 
         }
 
 
-        if(
-            response.status === 401
-        ){
-
-            throw new Error(
-                "Google authorization expired. Connect Google Drive again."
-            );
-
-        }
+        const errorText =
+        await response.text();
 
 
         throw new Error(
 
-            "Upload failed: " +
-            response.status
+            `Upload failed for part ${index + 1}. ` +
+            `Status: ${response.status}\n` +
+            errorText
 
         );
 
     }
-
-
-    const done =
-    parts
-    .slice(
-        0,
-        index + 1
-    )
-    .reduce(
-        (a,p) =>
-        a + p.size,
-        0
-    );
-
-
-    const totalSize =
-    parts.reduce(
-        (a,p) =>
-        a + p.size,
-        0
-    );
-
-
-    uploadProgress.style.display =
-    "block";
-
-
-    uploadFill.style.width =
-    (
-        done /
-        totalSize *
-        100
-    ) + "%";
-
-
-    uploadText.textContent =
-    `Uploaded ${index + 1} of ${total}`;
 
 }
 
@@ -1497,9 +1486,10 @@ async function uploadPart(
 uploadButton.onclick =
 async () => {
 
-    if(!accessToken){
-
-        googleButton.click();
+    if(
+        !accessToken ||
+        parts.length === 0
+    ){
 
         return;
 
@@ -1510,7 +1500,35 @@ async () => {
     true;
 
 
+    downloadAll.disabled =
+    true;
+
+
+    const totalBytes =
+    parts.reduce(
+        (sum,part) =>
+        sum + part.size,
+        0
+    );
+
+
+    let completedBytes = 0;
+
+
     try{
+
+        uploadProgress.style.display =
+        "block";
+
+
+        setUploadProgress(
+
+            0,
+
+            "Starting upload..."
+
+        );
+
 
         for(
             let i = 0;
@@ -1518,26 +1536,69 @@ async () => {
             i++
         ){
 
+            const part =
+            parts[i];
+
+
+            setUploadProgress(
+
+                (
+                    completedBytes /
+                    totalBytes
+                ) * 100,
+
+                `Uploading part ${i + 1} of ${parts.length}...`
+
+            );
+
+
             await uploadPart(
 
-                parts[i],
+                part,
 
                 i,
 
-                parts.length
+                parts.length,
+
+                completedBytes,
+
+                totalBytes
+
+            );
+
+
+            completedBytes +=
+            part.size;
+
+
+            setUploadProgress(
+
+                (
+                    completedBytes /
+                    totalBytes
+                ) * 100,
+
+                `Uploaded ${i + 1} of ${parts.length} parts.`
 
             );
 
         }
 
 
-        uploadText.textContent =
-        "All parts uploaded successfully!";
+        setUploadProgress(
 
+            100,
 
-        setStatus(
-            "All parts are now in Google Drive."
+            "All parts uploaded successfully."
+
         );
+
+
+        status.textContent =
+        "All parts uploaded to Google Drive.";
+
+        status.className =
+        "status success";
 
 
     }catch(error){
@@ -1545,15 +1606,25 @@ async () => {
         console.error(error);
 
 
-        setStatus(
-            error.message,
-            true
-        );
+        uploadText.textContent =
+        "Upload stopped.";
+
+
+        status.textContent =
+        error.message ||
+        "Upload failed.";
+
+        status.className =
+        "status error";
 
 
     }finally{
 
         uploadButton.disabled =
+        !accessToken ||
+        parts.length === 0;
+
+        downloadAll.disabled =
         false;
 
     }
