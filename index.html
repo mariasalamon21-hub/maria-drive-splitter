@@ -1,1 +1,994 @@
 
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Maria Drive Splitter</title>
+
+<script src="https://accounts.google.com/gsi/client" async defer></script>
+
+<style>
+*{box-sizing:border-box}
+body{margin:0;font-family:Arial,sans-serif;background:#f4f4f4;color:#222}
+.container{max-width:850px;margin:40px auto;padding:20px}
+.card{background:white;border-radius:14px;padding:22px;margin-bottom:20px;box-shadow:0 3px 12px #00000012}
+h1{margin-bottom:8px}.subtitle{color:#666;margin-bottom:25px}
+.drop-zone{border:2px dashed #aaa;border-radius:12px;padding:40px 20px;text-align:center;cursor:pointer}
+.file-name{margin-top:15px;font-weight:bold;word-break:break-all}
+.size-row{display:flex;gap:10px;margin-top:20px}
+input,select{padding:12px;border:1px solid #ccc;border-radius:8px;font-size:16px}
+.size-row input{flex:1}.size-row select{width:150px}
+button{border:0;border-radius:8px;padding:12px 18px;font-size:15px;cursor:pointer;background:#222;color:#fff}
+button:disabled{opacity:.5;cursor:not-allowed}
+.primary{width:100%;margin-top:20px}.google{background:#4285f4}
+.progress-container{margin-top:20px;display:none}
+.progress-bar{height:14px;background:#e5e5e5;border-radius:20px;overflow:hidden}
+.progress-fill{height:100%;width:0;background:#222}
+.progress-text{margin-top:8px;font-size:14px;color:#666}
+.part{display:flex;align-items:center;justify-content:space-between;gap:15px;padding:12px;border-bottom:1px solid #eee}
+.part-name{font-weight:bold;word-break:break-all}
+.part-size{color:#777;font-size:13px;margin-top:4px}
+.hidden{display:none!important}.status{margin-top:12px;font-size:14px}
+.success{color:#16803c;font-weight:bold}.error{color:#c62828;white-space:pre-wrap}
+.note{color:#666;font-size:14px;line-height:1.5}
+@media(max-width:600px){
+.container{margin:15px auto;padding:12px}
+.size-row{flex-direction:column}.size-row select{width:100%}
+.part{flex-direction:column;align-items:stretch}
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>Maria Drive Splitter</h1>
+<div class="subtitle">
+Compress your file into a real 7z archive, split it, and upload the parts.
+</div>
+
+<div class="card">
+
+<div id="dropZone" class="drop-zone">
+<strong>Choose a file</strong><br><br>
+Click here or drag a file here
+<input id="fileInput" type="file" hidden>
+</div>
+
+<div id="fileName" class="file-name"></div>
+
+<div class="size-row">
+<input id="sizeInput" type="number" min="0.000001" step="any" value="700">
+
+<select id="sizeUnit">
+<option value="bit">bit</option>
+<option value="Byte">Byte</option>
+<option value="KB">KB</option>
+<option value="MB" selected>MB</option>
+<option value="GB">GB</option>
+<option value="TB">TB</option>
+</select>
+</div>
+
+<button id="startButton" class="primary" disabled>
+Compress & Split
+</button>
+
+<div id="progress" class="progress-container">
+<div class="progress-bar">
+<div id="progressFill" class="progress-fill"></div>
+</div>
+<div id="progressText" class="progress-text"></div>
+</div>
+
+<div id="status" class="status"></div>
+
+</div>
+
+
+<div id="partsCard" class="card hidden">
+
+<h2>Parts</h2>
+<div id="partsList"></div>
+
+<button id="downloadAll" class="primary">
+Download All Parts
+</button>
+
+<button id="uploadButton" class="primary" disabled>
+Upload Parts to Google Drive
+</button>
+
+<div id="uploadProgress" class="progress-container">
+<div class="progress-bar">
+<div id="uploadFill" class="progress-fill"></div>
+</div>
+<div id="uploadText" class="progress-text"></div>
+</div>
+
+</div>
+
+
+<div class="card">
+
+<h2>Google Drive</h2>
+
+<p class="note">
+Connect Google Drive before uploading.
+</p>
+
+<button id="googleButton" class="google">
+Connect Google Drive
+</button>
+
+<div id="googleStatus" class="status"></div>
+
+</div>
+
+</div>
+
+
+<script>
+
+/* =====================================================
+   GOOGLE
+   ===================================================== */
+
+const GOOGLE_CLIENT_ID =
+"304831987723-5g9mvugqaoi8uhg6vofrjqqm77u48onh.apps.googleusercontent.com";
+
+const DRIVE_SCOPE =
+"https://www.googleapis.com/auth/drive.file";
+
+
+let selectedFile=null;
+let accessToken=null;
+let googleTokenClient=null;
+let parts=[];
+
+
+/* =====================================================
+   ELEMENTS
+   ===================================================== */
+
+const fileInput=document.getElementById("fileInput");
+const dropZone=document.getElementById("dropZone");
+const fileName=document.getElementById("fileName");
+const sizeInput=document.getElementById("sizeInput");
+const sizeUnit=document.getElementById("sizeUnit");
+const startButton=document.getElementById("startButton");
+
+const progress=document.getElementById("progress");
+const progressFill=document.getElementById("progressFill");
+const progressText=document.getElementById("progressText");
+const status=document.getElementById("status");
+
+const partsCard=document.getElementById("partsCard");
+const partsList=document.getElementById("partsList");
+const downloadAll=document.getElementById("downloadAll");
+const uploadButton=document.getElementById("uploadButton");
+
+const uploadProgress=document.getElementById("uploadProgress");
+const uploadFill=document.getElementById("uploadFill");
+const uploadText=document.getElementById("uploadText");
+
+const googleButton=document.getElementById("googleButton");
+const googleStatus=document.getElementById("googleStatus");
+
+
+/* =====================================================
+   HELPERS
+   ===================================================== */
+
+function formatBytes(bytes){
+
+if(!bytes)return"0 Bytes";
+
+const units=["Bytes","KB","MB","GB","TB"];
+
+const i=Math.floor(Math.log(bytes)/Math.log(1024));
+
+return(
+(bytes/Math.pow(1024,i)).toFixed(i?2:0)
++" "+units[i]
+);
+
+}
+
+
+function getBaseName(name){
+
+const dot=name.lastIndexOf(".");
+
+return dot===-1
+?name
+:name.substring(0,dot);
+
+}
+
+
+function sleep(ms){
+return new Promise(r=>setTimeout(r,ms));
+}
+
+
+function setStatus(text,error=false){
+
+status.textContent=text;
+
+status.className=
+error?"status error":"status";
+
+}
+
+
+function setProgress(percent,text){
+
+progress.style.display="block";
+
+progressFill.style.width=
+Math.min(100,Math.max(0,percent))+"%";
+
+progressText.textContent=text;
+
+}
+
+
+function convertToBytes(){
+
+const value=Number(sizeInput.value);
+
+if(!Number.isFinite(value)||value<=0){
+throw new Error("Enter a valid part size.");
+}
+
+const multiplier={
+bit:1/8,
+Byte:1,
+KB:1024,
+MB:1024**2,
+GB:1024**3,
+TB:1024**4
+};
+
+return value*multiplier[sizeUnit.value];
+
+}
+
+
+/* =====================================================
+   FILE PICKER
+   ===================================================== */
+
+dropZone.onclick=()=>fileInput.click();
+
+fileInput.onchange=()=>{
+
+if(fileInput.files.length){
+
+selectedFile=fileInput.files[0];
+
+fileName.textContent=
+selectedFile.name+
+" — "+
+formatBytes(selectedFile.size);
+
+startButton.disabled=false;
+
+}
+
+};
+
+
+dropZone.ondragover=e=>e.preventDefault();
+
+dropZone.ondrop=e=>{
+
+e.preventDefault();
+
+if(e.dataTransfer.files.length){
+
+selectedFile=e.dataTransfer.files[0];
+
+fileName.textContent=
+selectedFile.name+
+" — "+
+formatBytes(selectedFile.size);
+
+startButton.disabled=false;
+
+}
+
+};
+
+
+/* =====================================================
+   LOAD REAL 7-ZIP DIRECTLY
+   ===================================================== */
+
+let sevenZipModule=null;
+
+
+/*
+  IMPORTANT:
+  We load the actual Emscripten 7-Zip build directly.
+*/
+
+async function load7Zip(){
+
+if(sevenZipModule){
+return sevenZipModule;
+}
+
+setProgress(5,"Loading 7-Zip...");
+
+const script=document.createElement("script");
+
+script.src=
+"https://cdn.jsdelivr.net/gh/use-strict/7z-wasm@master/7zz.js";
+
+document.head.appendChild(script);
+
+await new Promise((resolve,reject)=>{
+
+script.onload=resolve;
+
+script.onerror=()=>{
+reject(
+new Error("Could not load 7-Zip WASM.")
+);
+};
+
+});
+
+
+if(typeof SevenZip==="undefined"){
+
+throw new Error(
+"7-Zip module did not initialize."
+);
+
+}
+
+
+sevenZipModule=
+await SevenZip({
+
+locateFile:function(path){
+
+if(path.endsWith(".wasm")){
+
+return "https://cdn.jsdelivr.net/gh/use-strict/7z-wasm@master/"+path;
+
+}
+
+return path;
+
+}
+
+});
+
+
+setProgress(10,"7-Zip loaded.");
+
+return sevenZipModule;
+
+}
+
+
+/* =====================================================
+   COMPRESS TO REAL 7Z
+   ===================================================== */
+
+async function compressTo7z(file){
+
+const sz=await load7Zip();
+
+setProgress(15,"Reading selected file...");
+
+const data=
+new Uint8Array(
+await file.arrayBuffer()
+);
+
+
+const inputPath=
+"/input_"+Date.now();
+
+
+const outputPath=
+"/archive.7z";
+
+
+setProgress(30,"Preparing 7-Zip...");
+
+
+sz.FS.writeFile(
+inputPath,
+data
+);
+
+
+setProgress(40,"Compressing to real 7z...");
+
+
+const result=
+sz.callMain([
+"a",
+"-t7z",
+"-mx=5",
+"-m0=lzma2",
+"-ms=off",
+outputPath,
+inputPath
+]);
+
+
+if(result!==0){
+
+throw new Error(
+"7-Zip failed. Exit code: "+result
+);
+
+}
+
+
+setProgress(85,"Reading 7z archive...");
+
+
+const archive=
+sz.FS.readFile(outputPath);
+
+
+try{
+sz.FS.unlink(inputPath);
+}catch(e){}
+
+try{
+sz.FS.unlink(outputPath);
+}catch(e){}
+
+
+setProgress(100,"7z compression complete.");
+
+return new Blob(
+[archive],
+{
+type:"application/x-7z-compressed"
+}
+);
+
+}
+
+
+/* =====================================================
+   SPLIT
+   ===================================================== */
+
+async function split7z(blob,originalName,partSize){
+
+parts=[];
+
+partsList.innerHTML="";
+
+const total=
+Math.ceil(blob.size/partSize);
+
+const base=
+getBaseName(originalName)+".7z";
+
+
+for(let i=0;i<total;i++){
+
+const start=i*partSize;
+
+const end=
+Math.min(start+partSize,blob.size);
+
+const partBlob=
+blob.slice(start,end);
+
+const number=
+String(i+1).padStart(3,"0");
+
+parts.push({
+
+name:
+base+"."+number,
+
+blob:partBlob,
+
+size:partBlob.size
+
+});
+
+
+setProgress(
+((i+1)/total)*100,
+`Creating part ${i+1} of ${total}...`
+);
+
+}
+
+
+renderParts();
+
+}
+
+
+/* =====================================================
+   RENDER PARTS
+   ===================================================== */
+
+function renderParts(){
+
+partsCard.classList.remove("hidden");
+
+partsList.innerHTML="";
+
+parts.forEach(part=>{
+
+const row=document.createElement("div");
+
+row.className="part";
+
+const info=document.createElement("div");
+
+const name=document.createElement("div");
+
+name.className="part-name";
+
+name.textContent=part.name;
+
+const size=document.createElement("div");
+
+size.className="part-size";
+
+size.textContent=formatBytes(part.size);
+
+info.appendChild(name);
+info.appendChild(size);
+
+
+const button=document.createElement("button");
+
+button.textContent="Download";
+
+button.onclick=()=>downloadBlob(
+part.blob,
+part.name
+);
+
+row.appendChild(info);
+row.appendChild(button);
+
+partsList.appendChild(row);
+
+});
+
+
+uploadButton.disabled=
+!accessToken||parts.length===0;
+
+}
+
+
+function downloadBlob(blob,name){
+
+const url=URL.createObjectURL(blob);
+
+const a=document.createElement("a");
+
+a.href=url;
+
+a.download=name;
+
+document.body.appendChild(a);
+
+a.click();
+
+a.remove();
+
+setTimeout(
+()=>URL.revokeObjectURL(url),
+1000
+);
+
+}
+
+
+/* =====================================================
+   START
+   ===================================================== */
+
+startButton.onclick=async()=>{
+
+if(!selectedFile)return;
+
+startButton.disabled=true;
+
+partsCard.classList.add("hidden");
+
+try{
+
+const partSize=convertToBytes();
+
+setStatus("Creating real 7z archive...");
+
+const archive=
+await compressTo7z(selectedFile);
+
+setStatus(
+"7z created: "+
+formatBytes(archive.size)
+);
+
+await split7z(
+archive,
+selectedFile.name,
+partSize
+);
+
+setStatus(
+"Done! "+
+parts.length+
+" parts created."
+);
+
+uploadButton.disabled=!accessToken;
+
+}catch(error){
+
+console.error(error);
+
+setStatus(
+error.message||"Something went wrong.",
+true
+);
+
+}finally{
+
+startButton.disabled=false;
+
+}
+
+};
+
+
+/* =====================================================
+   GOOGLE AUTH
+   ===================================================== */
+
+function initGoogle(){
+
+if(
+!window.google||
+!google.accounts||
+!google.accounts.oauth2
+){
+
+setTimeout(initGoogle,500);
+
+return;
+
+}
+
+
+googleTokenClient=
+google.accounts.oauth2.initTokenClient({
+
+client_id:GOOGLE_CLIENT_ID,
+
+scope:DRIVE_SCOPE,
+
+callback:response=>{
+
+if(response.access_token){
+
+accessToken=
+response.access_token;
+
+googleButton.textContent=
+"Google Drive Connected";
+
+googleStatus.textContent=
+"Connected successfully.";
+
+googleStatus.className=
+"status success";
+
+uploadButton.disabled=
+parts.length===0;
+
+}
+
+}
+
+});
+
+}
+
+
+googleButton.onclick=()=>{
+
+if(!googleTokenClient){
+
+initGoogle();
+
+setTimeout(()=>{
+
+if(googleTokenClient){
+
+googleTokenClient.requestAccessToken({
+prompt:"consent"
+});
+
+}
+
+},700);
+
+return;
+
+}
+
+googleTokenClient.requestAccessToken({
+prompt:"consent"
+});
+
+};
+
+
+initGoogle();
+
+
+/* =====================================================
+   DOWNLOAD ALL
+   ===================================================== */
+
+downloadAll.onclick=async()=>{
+
+for(const part of parts){
+
+downloadBlob(
+part.blob,
+part.name
+);
+
+await sleep(300);
+
+}
+
+};
+
+
+/* =====================================================
+   GOOGLE DRIVE UPLOAD
+   ===================================================== */
+
+async function createUploadSession(part){
+
+const response=
+await fetch(
+"https://www.googleapis.com/upload/drive/v3/files?uploadType=resumable",
+{
+
+method:"POST",
+
+headers:{
+
+Authorization:
+"Bearer "+accessToken,
+
+"Content-Type":
+"application/json",
+
+"X-Upload-Content-Type":
+"application/octet-stream",
+
+"X-Upload-Content-Length":
+String(part.size)
+
+},
+
+body:JSON.stringify({
+
+name:part.name,
+
+mimeType:
+"application/octet-stream"
+
+})
+
+});
+
+
+if(!response.ok){
+
+throw new Error(
+"Could not create upload session: "+
+response.status
+);
+
+}
+
+
+return response.headers.get("Location");
+
+}
+
+
+async function uploadPart(part,index,total){
+
+const url=
+await createUploadSession(part);
+
+const chunkSize=
+16*1024*1024;
+
+let position=0;
+
+
+while(position<part.size){
+
+const end=
+Math.min(
+position+chunkSize,
+part.size
+);
+
+const chunk=
+part.blob.slice(position,end);
+
+
+const response=
+await fetch(
+url,
+{
+
+method:"PUT",
+
+headers:{
+
+"Content-Type":
+"application/octet-stream",
+
+"Content-Range":
+`bytes ${position}-${end-1}/${part.size}`
+
+},
+
+body:chunk
+
+});
+
+
+if(response.status===308){
+
+const range=
+response.headers.get("Range");
+
+if(range){
+
+const match=
+range.match(/bytes=0-(\d+)/);
+
+if(match){
+
+position=
+Number(match[1])+1;
+
+continue;
+
+}
+
+}
+
+position=end;
+
+continue;
+
+}
+
+
+if(
+response.status===200||
+response.status===201
+){
+
+position=part.size;
+
+break;
+
+}
+
+
+if(response.status>=500){
+
+await sleep(2000);
+
+continue;
+
+}
+
+
+throw new Error(
+"Upload failed: "+
+response.status
+);
+
+}
+
+
+const done=
+parts
+.slice(0,index+1)
+.reduce((a,p)=>a+p.size,0);
+
+const totalSize=
+parts.reduce((a,p)=>a+p.size,0);
+
+uploadProgress.style.display="block";
+
+uploadFill.style.width=
+(done/totalSize*100)+"%";
+
+uploadText.textContent=
+`Uploaded ${index+1} of ${total}`;
+
+}
+
+
+uploadButton.onclick=async()=>{
+
+if(!accessToken){
+
+googleButton.click();
+
+return;
+
+}
+
+uploadButton.disabled=true;
+
+try{
+
+for(let i=0;i<parts.length;i++){
+
+await uploadPart(
+parts[i],
+i,
+parts.length
+);
+
+}
+
+uploadText.textContent=
+"All parts uploaded successfully!";
+
+setStatus(
+"All parts are now in Google Drive."
+);
+
+}catch(error){
+
+console.error(error);
+
+setStatus(
+error.message,
+true
+);
+
+}finally{
+
+uploadButton.disabled=false;
+
+}
+
+};
+
+</script>
+
+</body>
+</html>
