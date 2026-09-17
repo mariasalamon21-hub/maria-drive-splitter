@@ -3,22 +3,12 @@
 <head>
   <meta charset="UTF-8">
 
-  <meta
-    name="viewport"
-    content="width=device-width, initial-scale=1.0"
-  >
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
   <title>Maria Drive Splitter</title>
 
   <!-- Google Identity Services -->
   <script src="https://accounts.google.com/gsi/client"></script>
-
-  <!-- Google API -->
-  <script src="https://apis.google.com/js/api.js"></script>
-
-  <!-- Google Picker -->
-  <script src="https://apis.google.com/js/platform.js"></script>
-
 
   <style>
 
@@ -26,32 +16,23 @@
       box-sizing: border-box;
     }
 
-
     body {
       margin: 0;
       padding: 30px 15px;
-
-      font-family:
-        Arial,
-        Helvetica,
-        sans-serif;
-
+      font-family: Arial, Helvetica, sans-serif;
       background: #f4f6f8;
       color: #222;
     }
-
 
     .container {
       max-width: 900px;
       margin: auto;
     }
 
-
     h1 {
       text-align: center;
       margin-bottom: 10px;
     }
-
 
     .subtitle {
       text-align: center;
@@ -59,154 +40,113 @@
       margin-bottom: 30px;
     }
 
-
     .card {
       background: white;
       border-radius: 16px;
       padding: 25px;
       margin-bottom: 25px;
-
-      box-shadow:
-        0 4px 15px rgba(0,0,0,0.08);
+      box-shadow: 0 4px 15px rgba(0,0,0,0.08);
     }
-
 
     .card h2 {
       margin-top: 0;
     }
 
-
     button {
       border: none;
       border-radius: 10px;
-
       padding: 12px 18px;
-
       font-size: 15px;
       font-weight: bold;
-
       cursor: pointer;
-
       background: #1a73e8;
       color: white;
     }
 
-
     button:hover {
       opacity: 0.9;
     }
-
 
     button:disabled {
       opacity: 0.5;
       cursor: not-allowed;
     }
 
-
     .secondary {
       background: #555;
     }
-
 
     .success {
       background: #188038;
     }
 
-
     .danger {
       background: #d93025;
     }
 
-
     .drive-status {
       margin-top: 15px;
       padding: 12px;
-
       border-radius: 8px;
-
       background: #f1f3f4;
     }
-
 
     .input-row {
       display: flex;
       gap: 10px;
       margin-top: 15px;
-
       flex-wrap: wrap;
     }
-
 
     input,
     select {
       padding: 12px;
-
       border: 1px solid #ccc;
       border-radius: 8px;
-
       font-size: 15px;
     }
-
 
     input[type="number"] {
       width: 180px;
     }
 
-
     select {
       min-width: 130px;
     }
 
-
     .file-info {
       margin-top: 15px;
-
       padding: 15px;
-
       background: #f8f9fa;
-
       border-radius: 10px;
-
       word-break: break-word;
     }
-
 
     .parts {
       margin-top: 20px;
     }
 
-
     .part {
       padding: 15px;
-
       margin-bottom: 10px;
-
       border-radius: 10px;
-
       background: #f8f9fa;
-
       border: 1px solid #ddd;
     }
 
-
     .part-header {
       display: flex;
-
       justify-content: space-between;
-
       align-items: center;
-
       gap: 10px;
-
       flex-wrap: wrap;
     }
-
 
     .part-name {
       font-weight: bold;
       word-break: break-all;
+      flex: 1;
     }
-
 
     .part-status {
       margin-top: 8px;
@@ -214,86 +154,58 @@
       color: #666;
     }
 
-
     .progress-container {
       width: 100%;
-
       height: 10px;
-
       background: #ddd;
-
       border-radius: 10px;
-
       overflow: hidden;
-
       margin-top: 10px;
     }
 
-
     .progress {
       height: 100%;
-
       width: 0%;
-
       background: #1a73e8;
-
       transition: width 0.15s;
     }
 
-
     .selected-file {
       padding: 12px;
-
       background: #f8f9fa;
-
       border: 1px solid #ddd;
-
       border-radius: 8px;
-
       margin-top: 8px;
-
       word-break: break-word;
     }
 
-
     .merge-actions {
       margin-top: 20px;
-
       display: flex;
-
       gap: 10px;
-
       flex-wrap: wrap;
     }
 
-
     .message {
       margin-top: 15px;
-
       padding: 12px;
-
       border-radius: 8px;
-
       display: none;
     }
-
 
     .message.show {
       display: block;
     }
-
 
     .message.error {
       background: #fce8e6;
       color: #c5221f;
     }
 
-
     .message.success {
       background: #e6f4ea;
       color: #137333;
     }
-
 
     .small {
       font-size: 13px;
@@ -301,8 +213,17 @@
       margin-top: 8px;
     }
 
-  </style>
+    .merge-progress {
+      margin-top: 15px;
+    }
 
+    .merge-progress-text {
+      font-size: 14px;
+      color: #555;
+      margin-bottom: 8px;
+    }
+
+  </style>
 </head>
 
 
@@ -313,7 +234,7 @@
   <h1>Maria Drive Splitter</h1>
 
   <div class="subtitle">
-    Split large files and merge them again using Google Drive
+    Split large files and merge them again
   </div>
 
 
@@ -330,7 +251,6 @@
       Connect Google Drive
     </button>
 
-
     <div
       id="driveStatus"
       class="drive-status"
@@ -341,19 +261,16 @@
   </div>
 
 
-
   <!-- SPLIT -->
 
   <div class="card">
 
     <h2>✂️ Split File</h2>
 
-
     <input
       type="file"
       id="fileInput"
     >
-
 
     <div
       id="fileInfo"
@@ -372,49 +289,43 @@
         step="any"
       >
 
-
       <select id="partUnit">
 
-        <option value="1">
+        <option value="bit">
           Bit
         </option>
 
-        <option value="8">
+        <option value="byte" selected>
           Byte
         </option>
 
-        <option value="8192">
+        <option value="kb">
           KB
         </option>
 
-        <option value="8388608">
+        <option value="mb">
           MB
         </option>
 
-        <option value="8589934592">
+        <option value="gb">
           GB
         </option>
 
-        <option value="8796093022208">
+        <option value="tb">
           TB
         </option>
 
       </select>
 
-
-      <button
-        onclick="splitFile()"
-      >
+      <button onclick="splitFile()">
         Split File
       </button>
 
     </div>
 
 
-    <div
-      class="small"
-    >
-      Enter the size of each part.
+    <div class="small">
+      Choose the size of each part.
     </div>
 
 
@@ -439,16 +350,37 @@
 
     <h2>🔗 Merge Files</h2>
 
-
     <p>
-      Choose the split parts directly from Google Drive.
+      Choose the parts directly from your computer.
     </p>
 
 
-    <button
-      onclick="openDrivePicker()"
+    <!-- IMPORTANT:
+         This is LOCAL DEVICE ONLY.
+         No Google Drive Picker.
+    -->
+
+    <input
+      type="file"
+      id="mergeFileInput"
+      multiple
+      style="display:none;"
+      onchange="handleMergeFiles(this.files)"
     >
-      Choose Files from Google Drive
+
+
+    <button
+      onclick="document.getElementById('mergeFileInput').click()"
+    >
+      Choose Parts from Device
+    </button>
+
+
+    <button
+      class="secondary"
+      onclick="clearMergeFiles()"
+    >
+      Clear Selection
     </button>
 
 
@@ -462,10 +394,37 @@
 
       <button
         class="success"
+        id="mergeButton"
         onclick="mergeSelectedFiles()"
+        disabled
       >
         Merge Selected Files
       </button>
+
+    </div>
+
+
+    <div
+      id="mergeProgress"
+      class="merge-progress"
+      style="display:none;"
+    >
+
+      <div
+        id="mergeProgressText"
+        class="merge-progress-text"
+      >
+        Preparing...
+      </div>
+
+      <div class="progress-container">
+
+        <div
+          id="mergeProgressBar"
+          class="progress"
+        ></div>
+
+      </div>
 
     </div>
 
@@ -498,17 +457,8 @@ const GOOGLE_CLIENT_ID =
   "304831987723-5g9mvugqaoi8uhg6vofrjqqm77u48onh.apps.googleusercontent.com";
 
 
-const GOOGLE_API_KEY =
-  "AIzaSyDEh-aDemUgH5To39ZWVR_dFT3xis_30b4";
-
-
 const DRIVE_SCOPE =
   "https://www.googleapis.com/auth/drive.file";
-
-
-const GOOGLE_PROJECT_NUMBER =
-  "304831987723";
-
 
 
 // ============================================================
@@ -519,18 +469,14 @@ let accessToken = null;
 
 let tokenClient = null;
 
-let pickerLoaded = false;
+let currentParts = [];
 
-window.currentParts = [];
-
-window.selectedDriveFiles = [];
-
-window.mergedFile = null;
+let selectedMergeFiles = [];
 
 
 
 // ============================================================
-// GOOGLE AUTH
+// GOOGLE LOGIN
 // ============================================================
 
 function connectGoogle() {
@@ -542,7 +488,7 @@ function connectGoogle() {
   ) {
 
     alert(
-      "Google Identity Services has not loaded yet. Please wait a moment and try again."
+      "Google Sign-In is still loading. Please wait a moment and try again."
     );
 
     return;
@@ -565,14 +511,10 @@ function connectGoogle() {
             response.error
           ) {
 
-            console.error(
-              response
-            );
+            console.error(response);
 
-            showMessage(
-              "splitMessage",
-              "Google authorization failed.",
-              true
+            setDriveStatus(
+              "Google authorization failed."
             );
 
             return;
@@ -583,19 +525,15 @@ function connectGoogle() {
             response.access_token;
 
 
-          document.getElementById(
-            "driveStatus"
-          ).textContent =
-            "Connected to Google Drive";
+          setDriveStatus(
+            "Connected to Google Drive"
+          );
 
 
           document.getElementById(
             "connectGoogleBtn"
           ).textContent =
             "Google Drive Connected";
-
-
-          await loadPickerApi();
 
         }
 
@@ -611,49 +549,22 @@ function connectGoogle() {
 
 
 // ============================================================
-// LOAD PICKER
+// DRIVE STATUS
 // ============================================================
 
-function loadPickerApi() {
+function setDriveStatus(text) {
 
-  return new Promise(
-    function(resolve) {
-
-      if (
-        pickerLoaded
-      ) {
-
-        resolve();
-
-        return;
-      }
-
-
-      gapi.load(
-        "picker",
-        {
-
-          callback:
-            function() {
-
-              pickerLoaded = true;
-
-              resolve();
-
-            }
-
-        }
-      );
-
-    }
-  );
+  document.getElementById(
+    "driveStatus"
+  ).textContent =
+    text;
 
 }
 
 
 
 // ============================================================
-// FILE INPUT
+// FILE INFORMATION
 // ============================================================
 
 document
@@ -677,12 +588,6 @@ document
       }
 
 
-      const size =
-        formatBytes(
-          file.size
-        );
-
-
       const info =
         document.getElementById(
           "fileInfo"
@@ -698,7 +603,7 @@ document
         ${escapeHtml(file.name)}
         <br><br>
         <strong>Size:</strong>
-        ${size}
+        ${formatBytes(file.size)}
       `;
 
     }
@@ -707,7 +612,69 @@ document
 
 
 // ============================================================
-// SPLIT FILE
+// PART SIZE
+// ============================================================
+
+function getPartSizeBytes() {
+
+  const value =
+    parseFloat(
+      document.getElementById(
+        "partSize"
+      ).value
+    );
+
+
+  if (
+    !Number.isFinite(value) ||
+    value <= 0
+  ) {
+
+    return null;
+
+  }
+
+
+  const unit =
+    document.getElementById(
+      "partUnit"
+    ).value;
+
+
+  const multipliers = {
+
+    bit:
+      1 / 8,
+
+    byte:
+      1,
+
+    kb:
+      1024,
+
+    mb:
+      1024 * 1024,
+
+    gb:
+      1024 * 1024 * 1024,
+
+    tb:
+      1024 * 1024 * 1024 * 1024
+
+  };
+
+
+  return (
+    value *
+    multipliers[unit]
+  );
+
+}
+
+
+
+// ============================================================
+// SPLIT
 // ============================================================
 
 async function splitFile() {
@@ -734,17 +701,13 @@ async function splitFile() {
   }
 
 
-  const sizeValue =
-    parseFloat(
-      document.getElementById(
-        "partSize"
-      ).value
-    );
+  const partSize =
+    getPartSizeBytes();
 
 
   if (
-    !Number.isFinite(sizeValue) ||
-    sizeValue <= 0
+    !partSize ||
+    partSize < 1
   ) {
 
     showMessage(
@@ -757,98 +720,37 @@ async function splitFile() {
   }
 
 
-  const multiplier =
-    parseFloat(
-      document.getElementById(
-        "partUnit"
-      ).value
-    );
+  const actualPartSize =
+    Math.floor(partSize);
 
 
-  /*
-    The Bit option is converted correctly:
-    8 bits = 1 byte.
-  */
-
-  let partSize;
+  currentParts = [];
 
 
-  if (
-    multiplier === 1
-  ) {
-
-    partSize =
-      sizeValue / 8;
-
-  } else {
-
-    partSize =
-      sizeValue *
-      multiplier /
-      8;
-
-  }
-
-
-  /*
-    The values above are based on bits.
-
-    For Byte:
-    multiplier = 8
-    => value * 8 / 8 = value
-
-    For KB:
-    multiplier = 8192
-    => value * 8192 / 8 = value * 1024
-  */
-
-
-  if (
-    partSize < 1
-  ) {
-
-    showMessage(
-      "splitMessage",
-      "The part size is too small.",
-      true
-    );
-
-    return;
-  }
-
-
-  if (
-    partSize >= file.size
-  ) {
-
-    showMessage(
-      "splitMessage",
-      "The selected part size is larger than or equal to the file.",
-      true
-    );
-
-  }
-
-
-  window.currentParts = [];
-
-
-  const partsContainer =
+  const container =
     document.getElementById(
       "partsContainer"
     );
 
 
-  partsContainer.innerHTML =
+  container.innerHTML =
     "";
 
 
   const totalParts =
     Math.ceil(
       file.size /
-      partSize
+      actualPartSize
     );
 
+
+  /*
+    We create each part directly from
+    the original File using slice().
+
+    The original file is never uploaded
+    as one big file.
+  */
 
   for (
     let i = 0;
@@ -857,12 +759,14 @@ async function splitFile() {
   ) {
 
     const start =
-      i * partSize;
+      i *
+      actualPartSize;
 
 
     const end =
       Math.min(
-        start + partSize,
+        start +
+        actualPartSize,
         file.size
       );
 
@@ -874,33 +778,32 @@ async function splitFile() {
       );
 
 
-    const partIndex =
+    const number =
       i + 1;
 
 
-    const partNumber =
-      String(
-        partIndex
-      ).padStart(
-        3,
-        "0"
-      );
+    const numberText =
+      String(number)
+        .padStart(
+          3,
+          "0"
+        );
 
 
-    const partName =
-      `${file.name}.part${partNumber}`;
+    const name =
+      `${file.name}.part${numberText}`;
 
 
-    window.currentParts.push({
+    currentParts.push({
+
+      number:
+        number,
 
       name:
-        partName,
+        name,
 
       blob:
         blob,
-
-      number:
-        partIndex,
 
       size:
         blob.size,
@@ -909,9 +812,6 @@ async function splitFile() {
         false,
 
       driveId:
-        null,
-
-      error:
         null
 
     });
@@ -949,37 +849,37 @@ function displayParts() {
 
 
   if (
-    !window.currentParts.length
+    currentParts.length === 0
   ) {
 
     return;
   }
 
 
-  const uploadAllButton =
+  const uploadAll =
     document.createElement(
       "button"
     );
 
 
-  uploadAllButton.textContent =
-    "Upload All Parts to Google Drive";
-
-
-  uploadAllButton.className =
+  uploadAll.className =
     "success";
 
 
-  uploadAllButton.onclick =
+  uploadAll.textContent =
+    "Upload All Parts to Google Drive";
+
+
+  uploadAll.onclick =
     uploadAllParts;
 
 
   container.appendChild(
-    uploadAllButton
+    uploadAll
   );
 
 
-  window.currentParts.forEach(
+  currentParts.forEach(
     function(part) {
 
       const div =
@@ -1001,18 +901,18 @@ function displayParts() {
         <div class="part-header">
 
           <div class="part-name">
-            PART ${part.name}
+            ${escapeHtml(part.name)}
           </div>
 
           <button
-            onclick="downloadBlobPart(${part.number})"
+            onclick="downloadPart(${part.number})"
           >
             Download
           </button>
 
           <button
             class="success"
-            onclick="uploadPartByNumber(${part.number})"
+            onclick="uploadPart(${part.number})"
           >
             Upload
           </button>
@@ -1020,7 +920,10 @@ function displayParts() {
         </div>
 
 
-        <div class="part-status">
+        <div
+          class="part-status"
+          id="status-${part.number}"
+        >
           ${formatBytes(part.size)}
         </div>
 
@@ -1052,15 +955,12 @@ function displayParts() {
 // DOWNLOAD PART
 // ============================================================
 
-function downloadBlobPart(number) {
+function downloadPart(number) {
 
   const part =
-    window.currentParts.find(
-      function(p) {
-
-        return p.number === number;
-
-      }
+    currentParts.find(
+      p =>
+        p.number === number
     );
 
 
@@ -1101,8 +1001,15 @@ function downloadBlobPart(number) {
   a.remove();
 
 
-  URL.revokeObjectURL(
-    url
+  setTimeout(
+    function() {
+
+      URL.revokeObjectURL(
+        url
+      );
+
+    },
+    1000
   );
 
 }
@@ -1113,7 +1020,7 @@ function downloadBlobPart(number) {
 // UPLOAD ONE PART
 // ============================================================
 
-async function uploadPartByNumber(number) {
+async function uploadPart(number) {
 
   if (!accessToken) {
 
@@ -1126,12 +1033,9 @@ async function uploadPartByNumber(number) {
 
 
   const part =
-    window.currentParts.find(
-      function(p) {
-
-        return p.number === number;
-
-      }
+    currentParts.find(
+      p =>
+        p.number === number
     );
 
 
@@ -1186,13 +1090,7 @@ async function uploadPartByNumber(number) {
 
   } catch (error) {
 
-    console.error(
-      error
-    );
-
-
-    part.error =
-      error;
+    console.error(error);
 
 
     updatePartStatus(
@@ -1208,7 +1106,7 @@ async function uploadPartByNumber(number) {
 
 
 // ============================================================
-// UPLOAD ALL PARTS
+// UPLOAD ALL
 // ============================================================
 
 async function uploadAllParts() {
@@ -1224,7 +1122,7 @@ async function uploadAllParts() {
 
 
   for (
-    const part of window.currentParts
+    const part of currentParts
   ) {
 
     if (
@@ -1235,7 +1133,7 @@ async function uploadAllParts() {
     }
 
 
-    await uploadPartByNumber(
+    await uploadPart(
       part.number
     );
 
@@ -1338,15 +1236,21 @@ async function uploadToDrive(
   }
 
 
+  /*
+    16 MiB chunks.
+  */
+
   const chunkSize =
     16 * 1024 * 1024;
 
 
-  let offset = 0;
+  let offset =
+    0;
 
 
   while (
-    offset < blob.size
+    offset <
+    blob.size
   ) {
 
     const end =
@@ -1364,19 +1268,15 @@ async function uploadToDrive(
       );
 
 
-    let response;
+    let attempts =
+      0;
 
 
-    let attempts = 0;
-
-
-    while (
-      true
-    ) {
+    while (true) {
 
       try {
 
-        response =
+        const response =
           await fetch(
             uploadUrl,
             {
@@ -1402,6 +1302,11 @@ async function uploadToDrive(
             }
           );
 
+
+        /*
+          308 means Google received the chunk
+          and wants the next one.
+        */
 
         if (
           response.status === 308
@@ -1448,17 +1353,51 @@ async function uploadToDrive(
         }
 
 
+        /*
+          Final upload response.
+        */
+
         if (
           response.ok
         ) {
 
+          let result =
+            null;
+
+
+          try {
+
+            result =
+              await response.json();
+
+          } catch (_) {}
+
+
           offset =
             end;
 
-          break;
+
+          if (
+            onProgress
+          ) {
+
+            onProgress(
+              100
+            );
+
+          }
+
+
+          return result
+            ? result.id
+            : null;
 
         }
 
+
+        /*
+          Retry temporary errors.
+        */
 
         if (
           response.status === 429 ||
@@ -1472,17 +1411,15 @@ async function uploadToDrive(
         }
 
 
-        const errorText =
+        const text =
           await response.text();
 
 
         throw new Error(
-          errorText
+          text
         );
 
-      } catch (
-        error
-      ) {
+      } catch (error) {
 
         attempts++;
 
@@ -1516,250 +1453,49 @@ async function uploadToDrive(
       onProgress
     ) {
 
-      const percent =
+      onProgress(
         Math.round(
           (
             offset /
             blob.size
           ) *
           100
-        );
-
-
-      onProgress(
-        percent
+        )
       );
 
     }
 
   }
 
-
-  /*
-    Verify that Google Drive actually created
-    the file and return its Drive ID.
-  */
-
-  const verifyUrl =
-    "https://www.googleapis.com/drive/v3/files/" +
-    encodeURIComponent(
-      await getUploadedFileId(
-        fileName
-      )
-    ) +
-    "?fields=id,name,mimeType";
+}
 
 
-  /*
-    The upload itself normally returns the file ID
-    through the final response. Since some browsers
-    may not expose it through the resumable loop,
-    we verify by searching for the exact name.
-  */
 
-  const searchResponse =
-    await fetch(
-      "https://www.googleapis.com/drive/v3/files?" +
-      new URLSearchParams({
+// ============================================================
+// LOCAL MERGE — SELECT FILES
+// ============================================================
 
-        q:
-          `name = '${escapeDriveQuery(fileName)}' and trashed = false`,
+function handleMergeFiles(
+  fileList
+) {
 
-        fields:
-          "files(id,name,mimeType,createdTime)",
-
-        orderBy:
-          "createdTime desc",
-
-        pageSize:
-          "10"
-
-      }),
-      {
-
-        headers: {
-
-          "Authorization":
-            "Bearer " +
-            accessToken
-
-        }
-
-      }
+  selectedMergeFiles =
+    Array.from(
+      fileList
     );
 
 
-  if (
-    searchResponse.ok
-  ) {
-
-    const data =
-      await searchResponse.json();
-
-
-    if (
-      data.files &&
-      data.files.length
-    ) {
-
-      return data.files[0].id;
-
-    }
-
-  }
-
-
-  /*
-    The file was uploaded even if the verification
-    search did not return an ID.
-  */
-
-  return null;
+  displaySelectedMergeFiles();
 
 }
 
 
 
 // ============================================================
-// GOOGLE DRIVE PICKER
+// DISPLAY LOCAL FILES
 // ============================================================
 
-async function openDrivePicker() {
-
-  if (!accessToken) {
-
-    alert(
-      "Connect Google Drive first."
-    );
-
-    return;
-  }
-
-
-  if (!GOOGLE_API_KEY) {
-
-    alert(
-      "Google API key is missing."
-    );
-
-    return;
-  }
-
-
-  if (!pickerLoaded) {
-
-    await loadPickerApi();
-
-  }
-
-
-  if (!pickerLoaded) {
-
-    alert(
-      "Google Picker could not be loaded."
-    );
-
-    return;
-
-  }
-
-
-  /*
-    IMPORTANT:
-
-    There is NO setMimeTypes() here.
-
-    This means the website does not tell
-    Google Picker to show only PDF/video/etc.
-
-    The user can browse the files available
-    to this app in Google Drive.
-  */
-
-  const docsView =
-    new google.picker.DocsView(
-      google.picker.ViewId.DOCS
-    );
-
-
-  docsView.setIncludeFolders(
-    false
-  );
-
-
-  docsView.setSelectFolderEnabled(
-    false
-  );
-
-
-  const picker =
-    new google.picker.PickerBuilder()
-
-      .setDeveloperKey(
-        GOOGLE_API_KEY
-      )
-
-      .setOAuthToken(
-        accessToken
-      )
-
-      .setAppId(
-        GOOGLE_PROJECT_NUMBER
-      )
-
-      .addView(
-        docsView
-      )
-
-      .enableFeature(
-        google.picker.Feature.MULTISELECT_ENABLED
-      )
-
-      .setCallback(
-        pickerCallback
-      )
-
-      .build();
-
-
-  picker.setVisible(
-    true
-  );
-
-}
-
-
-
-// ============================================================
-// PICKER CALLBACK
-// ============================================================
-
-function pickerCallback(data) {
-
-  if (
-    data.action !==
-    google.picker.Action.PICKED
-  ) {
-
-    return;
-  }
-
-
-  window.selectedDriveFiles =
-    data.docs || [];
-
-
-  displaySelectedDriveFiles();
-
-}
-
-
-
-// ============================================================
-// DISPLAY SELECTED DRIVE FILES
-// ============================================================
-
-function displaySelectedDriveFiles() {
+function displaySelectedMergeFiles() {
 
   const container =
     document.getElementById(
@@ -1767,19 +1503,35 @@ function displaySelectedDriveFiles() {
     );
 
 
+  const mergeButton =
+    document.getElementById(
+      "mergeButton"
+    );
+
+
   container.innerHTML =
     "";
 
 
-  if (
-    !window.selectedDriveFiles.length
-  ) {
+  mergeButton.disabled =
+    selectedMergeFiles.length === 0;
 
-    container.innerHTML =
-      "<p>No files selected.</p>";
+
+  if (
+    selectedMergeFiles.length === 0
+  ) {
 
     return;
   }
+
+
+  const validFiles =
+    selectedMergeFiles.filter(
+      file =>
+        getPartNumber(
+          file.name
+        ) !== null
+    );
 
 
   const title =
@@ -1789,7 +1541,7 @@ function displaySelectedDriveFiles() {
 
 
   title.innerHTML =
-    `<strong>${window.selectedDriveFiles.length} file(s) selected:</strong>`;
+    `<strong>${selectedMergeFiles.length} file(s) selected</strong>`;
 
 
   container.appendChild(
@@ -1797,8 +1549,14 @@ function displaySelectedDriveFiles() {
   );
 
 
-  window.selectedDriveFiles.forEach(
+  selectedMergeFiles.forEach(
     function(file, index) {
+
+      const number =
+        getPartNumber(
+          file.name
+        );
+
 
       const div =
         document.createElement(
@@ -1811,12 +1569,27 @@ function displaySelectedDriveFiles() {
 
 
       div.innerHTML = `
-        <strong>${index + 1}.</strong>
+
+        <strong>
+          ${index + 1}.
+        </strong>
+
         ${escapeHtml(file.name)}
+
         <br>
+
         <span class="small">
-          ${file.mimeType || "Unknown type"}
+
+          ${number !== null
+            ? "Part " + number
+            : "⚠️ Not a valid .part file"
+          }
+
+          —
+          ${formatBytes(file.size)}
+
         </span>
+
       `;
 
 
@@ -1825,6 +1598,137 @@ function displaySelectedDriveFiles() {
       );
 
     }
+  );
+
+
+  if (
+    validFiles.length !==
+    selectedMergeFiles.length
+  ) {
+
+    showMessage(
+      "mergeMessage",
+      "Some selected files are not valid split parts.",
+      true
+    );
+
+  } else {
+
+    document.getElementById(
+      "mergeMessage"
+    ).className =
+      "message";
+
+  }
+
+}
+
+
+
+// ============================================================
+// CLEAR MERGE FILES
+// ============================================================
+
+function clearMergeFiles() {
+
+  selectedMergeFiles =
+    [];
+
+
+  document.getElementById(
+    "mergeFileInput"
+  ).value =
+    "";
+
+
+  document.getElementById(
+    "selectedFiles"
+  ).innerHTML =
+    "";
+
+
+  document.getElementById(
+    "mergeButton"
+  ).disabled =
+    true;
+
+
+  document.getElementById(
+    "mergedResult"
+  ).innerHTML =
+    "";
+
+
+  document.getElementById(
+    "mergeProgress"
+  ).style.display =
+    "none";
+
+
+  document.getElementById(
+    "mergeMessage"
+  ).className =
+    "message";
+
+}
+
+
+
+// ============================================================
+// GET PART NUMBER
+// ============================================================
+
+function getPartNumber(
+  name
+) {
+
+  /*
+    Accepts:
+
+    file.mp4.part001
+    file.pdf.part002
+    file.zip.part003
+
+    Also accepts:
+    part1
+    part2
+
+    but the normal Split format is
+    .part001, .part002, etc.
+  */
+
+  const match =
+    name.match(
+      /\.part(\d+)$/i
+    );
+
+
+  if (!match) {
+
+    return null;
+
+  }
+
+
+  return Number(
+    match[1]
+  );
+
+}
+
+
+
+// ============================================================
+// GET ORIGINAL NAME
+// ============================================================
+
+function getOriginalName(
+  name
+) {
+
+  return name.replace(
+    /\.part\d+$/i,
+    ""
   );
 
 }
@@ -1837,18 +1741,13 @@ function displaySelectedDriveFiles() {
 
 async function mergeSelectedFiles() {
 
-  const files =
-    window.selectedDriveFiles;
-
-
   if (
-    !files ||
-    !files.length
+    selectedMergeFiles.length === 0
   ) {
 
     showMessage(
       "mergeMessage",
-      "Please choose files from Google Drive first.",
+      "Please choose the parts from your device first.",
       true
     );
 
@@ -1860,13 +1759,17 @@ async function mergeSelectedFiles() {
 
     showMessage(
       "mergeMessage",
-      "Checking selected parts...",
+      "Checking files...",
       false
     );
 
 
-    const partInfo =
-      files.map(
+    /*
+      Get part information.
+    */
+
+    const parts =
+      selectedMergeFiles.map(
         function(file) {
 
           return {
@@ -1891,20 +1794,19 @@ async function mergeSelectedFiles() {
 
 
     /*
-      Every selected file must have a .partXXX
-      ending.
+      Validate .part format.
     */
 
     for (
-      const item of partInfo
+      const part of parts
     ) {
 
       if (
-        item.number === null
+        part.number === null
       ) {
 
         throw new Error(
-          `"${item.file.name}" is not a valid split part.`
+          `"${part.file.name}" is not a valid split part.`
         );
 
       }
@@ -1913,20 +1815,20 @@ async function mergeSelectedFiles() {
 
 
     /*
-      All parts must belong to the same
-      original file.
+      All parts must have the
+      same original filename.
     */
 
     const originalName =
-      partInfo[0].originalName;
+      parts[0].originalName;
 
 
     for (
-      const item of partInfo
+      const part of parts
     ) {
 
       if (
-        item.originalName !==
+        part.originalName !==
         originalName
       ) {
 
@@ -1940,16 +1842,13 @@ async function mergeSelectedFiles() {
 
 
     /*
-      Check duplicate part numbers.
+      Check duplicate numbers.
     */
 
     const numbers =
-      partInfo.map(
-        function(item) {
-
-          return item.number;
-
-        }
+      parts.map(
+        p =>
+          p.number
       );
 
 
@@ -1965,22 +1864,19 @@ async function mergeSelectedFiles() {
     ) {
 
       throw new Error(
-        "The same part number was selected more than once."
+        "A part number was selected more than once."
       );
 
     }
 
 
     /*
-      Sort numerically:
-      part001
-      part002
-      part003
-      ...
+      Sort:
+      1,2,3,4...
     */
 
-    partInfo.sort(
-      function(a, b) {
+    parts.sort(
+      function(a,b) {
 
         return a.number -
           b.number;
@@ -1990,13 +1886,18 @@ async function mergeSelectedFiles() {
 
 
     /*
-      Make sure the sequence starts
-      from part001 and has no gaps.
+      Make sure we have:
+      part001
+      part002
+      part003
+      ...
+
+      with no gaps.
     */
 
     for (
       let i = 0;
-      i < partInfo.length;
+      i < parts.length;
       i++
     ) {
 
@@ -2005,7 +1906,7 @@ async function mergeSelectedFiles() {
 
 
       if (
-        partInfo[i].number !==
+        parts[i].number !==
         expected
       ) {
 
@@ -2018,11 +1919,270 @@ async function mergeSelectedFiles() {
     }
 
 
-    showMessage(
-      "mergeMessage",
-      "Downloading parts from Google Drive...",
-      false
-    );
+    /*
+      Total size.
+    */
+
+    let totalSize =
+      0;
+
+
+    for (
+      const part of parts
+    ) {
+
+      totalSize +=
+        part.file.size;
+
+    }
+
+
+    /*
+      Show progress.
+    */
+
+    const progress =
+      document.getElementById(
+        "mergeProgress"
+      );
+
+
+    const progressText =
+      document.getElementById(
+        "mergeProgressText"
+      );
+
+
+    const progressBar =
+      document.getElementById(
+        "mergeProgressBar"
+      );
+
+
+    progress.style.display =
+      "block";
+
+
+    progressBar.style.width =
+      "0%";
+
+
+    progressText.textContent =
+      "Preparing merged file...";
+
+
+    /*
+      ========================================================
+      PREFERRED METHOD:
+      File System Access API
+      ========================================================
+
+      Chrome / Edge on Windows support this.
+
+      The output is written directly to disk,
+      so a huge file doesn't have to exist
+      completely in browser RAM.
+    */
+
+    if (
+      "showSaveFilePicker" in window
+    ) {
+
+      const handle =
+        await window.showSaveFilePicker({
+
+          suggestedName:
+            originalName,
+
+          types: [
+
+            {
+              description:
+                "Merged file",
+
+              accept: {
+
+                "*/*":
+                  [
+                    getExtension(
+                      originalName
+                    )
+                  ]
+
+              }
+
+            }
+
+          ]
+
+        });
+
+
+      const writable =
+        await handle.createWritable();
+
+
+      let written =
+        0;
+
+
+      try {
+
+        for (
+          let i = 0;
+          i < parts.length;
+          i++
+        ) {
+
+          const part =
+            parts[i];
+
+
+          progressText.textContent =
+            `Merging part ${i + 1} of ${parts.length}...`;
+
+
+          /*
+            Read each local part as a stream.
+          */
+
+          const reader =
+            part.file.stream()
+              .getReader();
+
+
+          try {
+
+            while (true) {
+
+              const result =
+                await reader.read();
+
+
+              if (
+                result.done
+              ) {
+
+                break;
+
+              }
+
+
+              await writable.write(
+                result.value
+              );
+
+
+              written +=
+                result.value.byteLength;
+
+
+              const percent =
+                Math.round(
+                  (
+                    written /
+                    totalSize
+                  ) *
+                  100
+                );
+
+
+              progressBar.style.width =
+                percent + "%";
+
+
+              progressText.textContent =
+                `Merging... ${percent}%`;
+
+            }
+
+          } finally {
+
+            reader.releaseLock();
+
+          }
+
+        }
+
+
+        await writable.close();
+
+
+        progressBar.style.width =
+          "100%";
+
+
+        progressText.textContent =
+          "Merge completed successfully.";
+
+
+        showMessage(
+          "mergeMessage",
+          "The file was merged successfully and saved to your device.",
+          false
+        );
+
+
+        document.getElementById(
+          "mergedResult"
+        ).innerHTML = `
+
+          <div class="file-info">
+
+            <strong>
+              ✅ Merge completed
+            </strong>
+
+            <br><br>
+
+            File:
+            ${escapeHtml(originalName)}
+
+            <br>
+
+            Size:
+            ${formatBytes(totalSize)}
+
+          </div>
+
+        `;
+
+
+      } catch (error) {
+
+        try {
+
+          await writable.abort();
+
+        } catch (_) {}
+
+
+        throw error;
+
+      }
+
+
+      return;
+
+    }
+
+
+    /*
+      ========================================================
+      FALLBACK
+      ========================================================
+
+      If the browser doesn't support
+      showSaveFilePicker, use Blob.
+
+      This is okay for smaller files,
+      but very large files are better
+      handled by Chrome/Edge with the
+      method above.
+    */
+
+    progressText.textContent =
+      "Preparing merged file in browser memory...";
 
 
     const blobs = [];
@@ -2030,127 +2190,133 @@ async function mergeSelectedFiles() {
 
     for (
       let i = 0;
-      i < partInfo.length;
+      i < parts.length;
       i++
     ) {
 
-      const item =
-        partInfo[i];
-
-
-      showMessage(
-        "mergeMessage",
-        `Downloading ${item.file.name} (${i + 1}/${partInfo.length})...`,
-        false
-      );
-
-
-      const blob =
-        await downloadDriveFile(
-          item.file.id
-        );
+      progressText.textContent =
+        `Loading part ${i + 1} of ${parts.length}...`;
 
 
       blobs.push(
-        blob
+        parts[i].file
       );
+
+
+      const percent =
+        Math.round(
+          (
+            blobs.reduce(
+              (sum, file) =>
+                sum +
+                file.size,
+              0
+            ) /
+            totalSize
+          ) *
+          100
+        );
+
+
+      progressBar.style.width =
+        percent + "%";
 
     }
 
-
-    showMessage(
-      "mergeMessage",
-      "Merging files...",
-      false
-    );
-
-
-    /*
-      IMPORTANT:
-
-      No compression.
-      No conversion.
-      No video processing.
-
-      The blobs are simply concatenated
-      byte-for-byte.
-    */
 
     const mergedBlob =
       new Blob(
         blobs,
         {
           type:
-            getMimeType(
-              originalName
-            )
+            "application/octet-stream"
         }
       );
 
 
-    window.mergedFile = {
-
-      blob:
-        mergedBlob,
-
-      name:
-        originalName
-
-    };
-
-
-    const result =
-      document.getElementById(
-        "mergedResult"
+    const url =
+      URL.createObjectURL(
+        mergedBlob
       );
 
 
-    result.innerHTML = `
+    const a =
+      document.createElement(
+        "a"
+      );
 
-      <div class="file-info">
 
-        <strong>
-          Merge completed successfully.
-        </strong>
+    a.href =
+      url;
 
-        <br><br>
 
-        File:
-        ${escapeHtml(originalName)}
+    a.download =
+      originalName;
 
-        <br>
 
-        Size:
-        ${formatBytes(mergedBlob.size)}
+    document.body.appendChild(
+      a
+    );
 
-        <br><br>
 
-        <button
-          class="success"
-          onclick="downloadMergedFile()"
-        >
-          Download Merged File
-        </button>
+    a.click();
 
-      </div>
 
-    `;
+    a.remove();
+
+
+    setTimeout(
+      function() {
+
+        URL.revokeObjectURL(
+          url
+        );
+
+      },
+      5000
+    );
+
+
+    progressBar.style.width =
+      "100%";
+
+
+    progressText.textContent =
+      "Merge completed successfully.";
 
 
     showMessage(
       "mergeMessage",
-      "Merge completed successfully.",
+      "The file was merged successfully.",
       false
     );
 
 
-  } catch (
-    error
-  ) {
+  } catch (error) {
 
     console.error(
       error
     );
+
+
+    /*
+      User cancelling Save As
+      isn't treated as a scary error.
+    */
+
+    if (
+      error.name ===
+      "AbortError"
+    ) {
+
+      showMessage(
+        "mergeMessage",
+        "Save cancelled.",
+        true
+      );
+
+      return;
+    }
 
 
     showMessage(
@@ -2166,227 +2332,29 @@ async function mergeSelectedFiles() {
 
 
 // ============================================================
-// DOWNLOAD DRIVE FILE
+// EXTENSION
 // ============================================================
 
-async function downloadDriveFile(
-  fileId
-) {
-
-  const response =
-    await fetch(
-      "https://www.googleapis.com/drive/v3/files/" +
-      encodeURIComponent(
-        fileId
-      ) +
-      "?alt=media",
-      {
-
-        headers: {
-
-          "Authorization":
-            "Bearer " +
-            accessToken
-
-        }
-
-      }
-    );
-
-
-  if (
-    !response.ok
-  ) {
-
-    const text =
-      await response.text();
-
-
-    throw new Error(
-      "Could not download file from Google Drive: " +
-      text
-    );
-
-  }
-
-
-  return await response.blob();
-
-}
-
-
-
-// ============================================================
-// DOWNLOAD MERGED FILE
-// ============================================================
-
-function downloadMergedFile() {
-
-  if (
-    !window.mergedFile
-  ) {
-
-    return;
-  }
-
-
-  const url =
-    URL.createObjectURL(
-      window.mergedFile.blob
-    );
-
-
-  const a =
-    document.createElement(
-      "a"
-    );
-
-
-  a.href =
-    url;
-
-
-  a.download =
-    window.mergedFile.name;
-
-
-  document.body.appendChild(
-    a
-  );
-
-
-  a.click();
-
-
-  a.remove();
-
-
-  URL.revokeObjectURL(
-    url
-  );
-
-}
-
-
-
-// ============================================================
-// PART NUMBER
-// ============================================================
-
-function getPartNumber(
+function getExtension(
   fileName
 ) {
 
   const match =
     fileName.match(
-      /\.part(\d+)$/i
+      /(\.[^\.]+)$/
     );
 
 
-  if (!match) {
+  if (
+    !match
+  ) {
 
-    return null;
+    return ".bin";
 
   }
 
 
-  return Number(
-    match[1]
-  );
-
-}
-
-
-
-// ============================================================
-// ORIGINAL FILE NAME
-// ============================================================
-
-function getOriginalName(
-  fileName
-) {
-
-  return fileName.replace(
-    /\.part\d+$/i,
-    ""
-  );
-
-}
-
-
-
-// ============================================================
-// MIME TYPE
-// ============================================================
-
-function getMimeType(
-  fileName
-) {
-
-  const extension =
-    fileName
-      .split(".")
-      .pop()
-      .toLowerCase();
-
-
-  const types = {
-
-    mp4:
-      "video/mp4",
-
-    mov:
-      "video/quicktime",
-
-    mkv:
-      "video/x-matroska",
-
-    avi:
-      "video/x-msvideo",
-
-    mp3:
-      "audio/mpeg",
-
-    wav:
-      "audio/wav",
-
-    pdf:
-      "application/pdf",
-
-    zip:
-      "application/zip",
-
-    "7z":
-      "application/x-7z-compressed",
-
-    rar:
-      "application/vnd.rar",
-
-    iso:
-      "application/x-iso9660-image",
-
-    psd:
-      "image/vnd.adobe.photoshop",
-
-    jpg:
-      "image/jpeg",
-
-    jpeg:
-      "image/jpeg",
-
-    png:
-      "image/png",
-
-    txt:
-      "text/plain"
-
-  };
-
-
-  return (
-    types[extension] ||
-    "application/octet-stream"
-  );
+  return match[1];
 
 }
 
@@ -2425,30 +2393,17 @@ function updatePartStatus(
   text
 ) {
 
-  const part =
+  const element =
     document.getElementById(
-      `part-${number}`
-    );
-
-
-  if (!part) {
-
-    return;
-
-  }
-
-
-  const status =
-    part.querySelector(
-      ".part-status"
+      `status-${number}`
     );
 
 
   if (
-    status
+    element
   ) {
 
-    status.textContent =
+    element.textContent =
       text;
 
   }
@@ -2530,25 +2485,6 @@ function formatBytes(
 
 
 
-function sleep(
-  ms
-) {
-
-  return new Promise(
-    function(resolve) {
-
-      setTimeout(
-        resolve,
-        ms
-      );
-
-    }
-  );
-
-}
-
-
-
 function escapeHtml(
   text
 ) {
@@ -2569,33 +2505,17 @@ function escapeHtml(
 
 
 
-function escapeDriveQuery(
-  text
+function sleep(
+  ms
 ) {
 
-  return text.replace(
-    /\\/g,
-    "\\\\"
-  ).replace(
-    /'/g,
-    "\\'"
+  return new Promise(
+    resolve =>
+      setTimeout(
+        resolve,
+        ms
+      )
   );
-
-}
-
-
-
-async function getUploadedFileId(
-  fileName
-) {
-
-  /*
-    Kept as a helper for compatibility.
-    The actual verification is performed
-    after upload.
-  */
-
-  return "";
 
 }
 
