@@ -3,7 +3,11 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
   <title>Maria Drive Splitter</title>
+
+  <!-- Google Identity Services -->
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
 
   <style>
     * {
@@ -150,6 +154,11 @@
       line-height: 1.6;
     }
 
+    .success {
+      color: #16a34a;
+      font-weight: bold;
+    }
+
     .error {
       color: #dc2626;
       font-weight: bold;
@@ -167,6 +176,7 @@
     Split your file into the exact size you choose
   </div>
 
+  <!-- FILE CARD -->
   <div class="card">
 
     <label class="drop-zone" for="fileInput">
@@ -219,6 +229,8 @@
 
   </div>
 
+
+  <!-- PARTS CARD -->
   <div
     class="card"
     id="partsCard"
@@ -234,6 +246,8 @@
 
   </div>
 
+
+  <!-- GOOGLE DRIVE CARD -->
   <div class="card">
 
     <h2>Google Drive</h2>
@@ -241,11 +255,11 @@
     <p class="note">
       The original file stays on your computer.
       The file is processed locally in your browser.
-      Google Drive upload will be connected separately.
+      Google Drive authorization is required before uploading.
     </p>
 
     <button id="googleButton">
-      Sign in with Google Drive
+      Connect Google Drive
     </button>
 
     <div
@@ -257,7 +271,26 @@
 
 </div>
 
+
 <script>
+
+/* =========================================================
+   GOOGLE DRIVE CONFIGURATION
+   ========================================================= */
+
+const GOOGLE_CLIENT_ID =
+  "304831987723-5g9mvugqaoi8uhg6vofrjqqm77u48onh.apps.googleusercontent.com";
+
+const DRIVE_SCOPE =
+  "https://www.googleapis.com/auth/drive.file";
+
+let googleTokenClient = null;
+let accessToken = null;
+
+
+/* =========================================================
+   ELEMENTS
+   ========================================================= */
 
 const fileInput =
   document.getElementById("fileInput");
@@ -303,32 +336,142 @@ let selectedFile = null;
 let parts = [];
 
 
-/* -------------------------
-   FILE SELECTION
-------------------------- */
+/* =========================================================
+   GOOGLE AUTHORIZATION
+   ========================================================= */
 
-fileInput.addEventListener("change", () => {
+function initializeGoogleAuth() {
 
-  selectedFile = fileInput.files[0];
+  if (
+    typeof google === "undefined" ||
+    !google.accounts ||
+    !google.accounts.oauth2
+  ) {
+    driveStatus.textContent =
+      "Google authorization is still loading. Please wait a moment.";
 
-  if (!selectedFile) {
-    startButton.disabled = true;
+    driveStatus.className = "status";
+
+    setTimeout(initializeGoogleAuth, 500);
+
     return;
   }
 
-  fileName.textContent =
-    selectedFile.name +
-    " — " +
-    formatBytes(selectedFile.size);
 
-  startButton.disabled = false;
+  googleTokenClient =
+    google.accounts.oauth2.initTokenClient({
 
-});
+      client_id: GOOGLE_CLIENT_ID,
+
+      scope: DRIVE_SCOPE,
+
+      callback: (response) => {
+
+        if (response.error) {
+
+          console.error(response);
+
+          driveStatus.textContent =
+            "Google authorization failed.";
+
+          driveStatus.className =
+            "status error";
+
+          return;
+        }
 
 
-/* -------------------------
+        accessToken =
+          response.access_token;
+
+
+        driveStatus.textContent =
+          "✓ Google Drive connected successfully.";
+
+        driveStatus.className =
+          "status success";
+
+
+        googleButton.textContent =
+          "Google Drive Connected";
+
+        googleButton.disabled = true;
+
+      }
+
+    });
+
+}
+
+
+/* =========================================================
+   GOOGLE BUTTON
+   ========================================================= */
+
+googleButton.addEventListener(
+  "click",
+  () => {
+
+    if (!googleTokenClient) {
+
+      driveStatus.textContent =
+        "Google authorization is still loading. Please wait.";
+
+      return;
+
+    }
+
+
+    driveStatus.textContent =
+      "Opening Google authorization...";
+
+
+    googleTokenClient.requestAccessToken({
+      prompt: "consent"
+    });
+
+  }
+);
+
+
+/* =========================================================
+   FILE SELECTION
+   ========================================================= */
+
+fileInput.addEventListener(
+  "change",
+  () => {
+
+    selectedFile =
+      fileInput.files[0];
+
+
+    if (!selectedFile) {
+
+      startButton.disabled = true;
+
+      fileName.textContent =
+        "No file selected";
+
+      return;
+    }
+
+
+    fileName.textContent =
+      selectedFile.name +
+      " — " +
+      formatBytes(selectedFile.size);
+
+
+    startButton.disabled = false;
+
+  }
+);
+
+
+/* =========================================================
    SPLIT
-------------------------- */
+   ========================================================= */
 
 startButton.addEventListener(
   "click",
@@ -338,8 +481,10 @@ startButton.addEventListener(
       return;
     }
 
+
     const enteredSize =
       Number(partSizeInput.value);
+
 
     if (
       !enteredSize ||
@@ -396,6 +541,8 @@ startButton.addEventListener(
 
     progressContainer.style.display = "block";
 
+    progressBar.style.width = "0%";
+
     startButton.disabled = true;
 
 
@@ -414,6 +561,7 @@ startButton.addEventListener(
 
       const start =
         i * bytesPerPart;
+
 
       const end =
         Math.min(
@@ -438,6 +586,7 @@ startButton.addEventListener(
         removeExtension(
           selectedFile.name
         );
+
 
       const extension =
         getExtension(
@@ -477,7 +626,9 @@ startButton.addEventListener(
     status.textContent =
       `${parts.length} parts created successfully.`;
 
+
     showParts();
+
 
     startButton.disabled = false;
 
@@ -485,15 +636,18 @@ startButton.addEventListener(
 );
 
 
-/* -------------------------
+/* =========================================================
    SHOW PARTS
-------------------------- */
+   ========================================================= */
 
 function showParts() {
 
-  partsCard.style.display = "block";
+  partsCard.style.display =
+    "block";
 
-  partsList.innerHTML = "";
+
+  partsList.innerHTML =
+    "";
 
 
   parts.forEach(
@@ -501,6 +655,7 @@ function showParts() {
 
       const row =
         document.createElement("div");
+
 
       row.className =
         "part";
@@ -511,7 +666,7 @@ function showParts() {
 
 
       info.innerHTML =
-        `<strong>${part.name}</strong>
+        `<strong>${escapeHtml(part.name)}</strong>
         <br>
         <small>${formatBytes(part.size)}</small>`;
 
@@ -540,9 +695,9 @@ function showParts() {
 }
 
 
-/* -------------------------
+/* =========================================================
    DOWNLOAD ONE PART
-------------------------- */
+   ========================================================= */
 
 function downloadPart(index) {
 
@@ -581,9 +736,9 @@ function downloadPart(index) {
 }
 
 
-/* -------------------------
+/* =========================================================
    DOWNLOAD ALL
-------------------------- */
+   ========================================================= */
 
 downloadAll.addEventListener(
   "click",
@@ -605,30 +760,16 @@ downloadAll.addEventListener(
 );
 
 
-/* -------------------------
-   GOOGLE DRIVE PLACEHOLDER
-------------------------- */
-
-googleButton.addEventListener(
-  "click",
-  () => {
-
-    driveStatus.textContent =
-      "Google Drive connection will be added next.";
-
-  }
-);
-
-
-/* -------------------------
+/* =========================================================
    HELPERS
-------------------------- */
+   ========================================================= */
 
 function formatBytes(bytes) {
 
   if (bytes === 0) {
     return "0 Bytes";
   }
+
 
   const units = [
     "Bytes",
@@ -638,6 +779,7 @@ function formatBytes(bytes) {
     "TB"
   ];
 
+
   const i =
     Math.floor(
       Math.log(bytes) /
@@ -646,11 +788,14 @@ function formatBytes(bytes) {
 
 
   return (
-    (bytes /
-      Math.pow(1024, i))
-      .toFixed(2)
-    + " "
-    + units[i]
+    (
+      bytes /
+      Math.pow(1024, i)
+    ).toFixed(2)
+    +
+    " "
+    +
+    units[i]
   );
 
 }
@@ -661,9 +806,11 @@ function getExtension(name) {
   const pieces =
     name.split(".");
 
+
   if (pieces.length === 1) {
     return "bin";
   }
+
 
   return pieces.pop();
 
@@ -675,14 +822,29 @@ function removeExtension(name) {
   const index =
     name.lastIndexOf(".");
 
+
   if (index === -1) {
     return name;
   }
+
 
   return name.substring(
     0,
     index
   );
+
+}
+
+
+function escapeHtml(text) {
+
+  const div =
+    document.createElement("div");
+
+  div.textContent =
+    text;
+
+  return div.innerHTML;
 
 }
 
@@ -695,6 +857,20 @@ function sleep(ms) {
   );
 
 }
+
+
+/* =========================================================
+   START GOOGLE INITIALIZATION
+   ========================================================= */
+
+window.addEventListener(
+  "load",
+  () => {
+
+    initializeGoogleAuth();
+
+  }
+);
 
 </script>
 
