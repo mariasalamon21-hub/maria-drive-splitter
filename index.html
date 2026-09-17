@@ -1,3 +1,4 @@
+```html
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -6,7 +7,6 @@
 
   <title>Maria Drive Splitter</title>
 
-  <!-- Google Identity Services -->
   <script src="https://accounts.google.com/gsi/client" async defer></script>
 
   <style>
@@ -43,7 +43,7 @@
       border-radius: 16px;
       padding: 25px;
       margin-bottom: 20px;
-      box-shadow: 0 5px 20px rgba(0,0,0,0.08);
+      box-shadow: 0 5px 20px rgba(0, 0, 0, 0.08);
     }
 
     .drop-zone {
@@ -85,11 +85,12 @@
     }
 
     .size-row select {
-      width: 100px;
+      width: 120px;
       padding: 13px;
       border: 1px solid #ccc;
       border-radius: 10px;
       font-size: 16px;
+      background: white;
     }
 
     button {
@@ -241,12 +242,24 @@
       <input
         id="partSize"
         type="number"
-        min="1"
-        step="1"
+        min="0.000001"
+        step="any"
         placeholder="Enter size"
       >
 
       <select id="unit">
+
+        <option value="bit">
+          bit
+        </option>
+
+        <option value="Byte">
+          Byte
+        </option>
+
+        <option value="KB">
+          KB
+        </option>
 
         <option value="MB" selected>
           MB
@@ -254,6 +267,10 @@
 
         <option value="GB">
           GB
+        </option>
+
+        <option value="TB">
+          TB
         </option>
 
       </select>
@@ -314,7 +331,6 @@
     </button>
 
 
-    <!-- DRIVE UPLOAD -->
     <button
       id="uploadDriveButton"
       disabled
@@ -466,6 +482,41 @@
 
 
   /* =========================================================
+     UNIT CONVERSION
+  ========================================================= */
+
+  function convertToBytes(
+    value,
+    unit
+  ) {
+
+    const units = {
+
+      bit: 1 / 8,
+
+      Byte: 1,
+
+      KB: 1024,
+
+      MB: 1024 * 1024,
+
+      GB: 1024 * 1024 * 1024,
+
+      TB:
+        1024 *
+        1024 *
+        1024 *
+        1024
+
+    };
+
+
+    return value * units[unit];
+
+  }
+
+
+  /* =========================================================
      GOOGLE AUTH
   ========================================================= */
 
@@ -476,7 +527,12 @@
       !google.accounts ||
       !google.accounts.oauth2
     ) {
-      setTimeout(initializeGoogleAuth, 500);
+
+      setTimeout(
+        initializeGoogleAuth,
+        500
+      );
+
       return;
     }
 
@@ -484,49 +540,54 @@
     googleTokenClient =
       google.accounts.oauth2.initTokenClient({
 
-        client_id: GOOGLE_CLIENT_ID,
+        client_id:
+          GOOGLE_CLIENT_ID,
 
-        scope: DRIVE_SCOPE,
+        scope:
+          DRIVE_SCOPE,
 
-        callback: (response) => {
+        callback:
+          (response) => {
 
-          if (response.error) {
+            if (response.error) {
 
-            console.error(response);
+              console.error(
+                response
+              );
+
+              driveStatus.textContent =
+                "Google authorization failed.";
+
+              driveStatus.className =
+                "status error";
+
+              return;
+            }
+
+
+            accessToken =
+              response.access_token;
+
+
+            googleButton.textContent =
+              "Google Drive Connected";
+
+
+            googleButton.classList.add(
+              "drive-connected"
+            );
+
 
             driveStatus.textContent =
-              "Google authorization failed.";
+              "Google Drive is connected. You can now upload your parts.";
 
             driveStatus.className =
-              "status error";
+              "status success";
 
-            return;
+
+            updateUploadButton();
+
           }
-
-
-          accessToken =
-            response.access_token;
-
-
-          googleButton.textContent =
-            "Google Drive Connected";
-
-
-          googleButton.classList.add(
-            "drive-connected"
-          );
-
-
-          driveStatus.textContent =
-            "Google Drive is connected. You can now upload your parts.";
-
-          driveStatus.className =
-            "status success";
-
-
-          updateUploadButton();
-
-        }
 
       });
 
@@ -551,7 +612,9 @@
 
 
       googleTokenClient.requestAccessToken({
+
         prompt: "consent"
+
       });
 
     }
@@ -592,8 +655,10 @@
 
       parts = [];
 
+
       partsCard.style.display =
         "none";
+
 
       uploadDriveButton.disabled =
         true;
@@ -603,7 +668,7 @@
 
 
   /* =========================================================
-     SPLIT
+     SPLIT FILE
   ========================================================= */
 
   startButton.addEventListener(
@@ -616,47 +681,55 @@
 
 
       const enteredSize =
-        Number(partSizeInput.value);
+        Number(
+          partSizeInput.value
+        );
 
 
       if (
-        !enteredSize ||
+        !Number.isFinite(
+          enteredSize
+        ) ||
         enteredSize <= 0
       ) {
 
         alert(
-          "Please enter a valid part size."
+          "Please enter a valid size."
         );
 
         return;
       }
 
 
-      let partSize;
+      const partSize =
+        convertToBytes(
+          enteredSize,
+          unitSelect.value
+        );
 
 
-      if (unitSelect.value === "GB") {
+      if (
+        !Number.isFinite(
+          partSize
+        ) ||
+        partSize < 1
+      ) {
 
-        partSize =
-          enteredSize *
-          1024 *
-          1024 *
-          1024;
+        alert(
+          "The selected size is too small."
+        );
 
-      } else {
-
-        partSize =
-          enteredSize *
-          1024 *
-          1024;
-
+        return;
       }
 
 
-      if (partSize >= selectedFile.size) {
+      if (
+        partSize >=
+        selectedFile.size
+      ) {
 
         alert(
-          "The part size is larger than or equal to the original file."
+          "The part size must be smaller than the original file."
         );
 
         return;
@@ -688,7 +761,8 @@
 
 
       while (
-        offset < selectedFile.size
+        offset <
+        selectedFile.size
       ) {
 
         const end =
@@ -706,11 +780,15 @@
 
 
         const extension =
-          getExtension(selectedFile.name);
+          getExtension(
+            selectedFile.name
+          );
 
 
         const baseName =
-          getBaseName(selectedFile.name);
+          getBaseName(
+            selectedFile.name
+          );
 
 
         const partName =
@@ -719,11 +797,14 @@
 
         parts.push({
 
-          name: partName,
+          name:
+            partName,
 
-          blob: blob,
+          blob:
+            blob,
 
-          size: blob.size
+          size:
+            blob.size
 
         });
 
@@ -736,8 +817,10 @@
 
 
         const percent =
-          (offset / selectedFile.size) *
-          100;
+          (
+            offset /
+            selectedFile.size
+          ) * 100;
 
 
         progressBar.style.width =
@@ -748,14 +831,12 @@
           `Creating part ${partNumber - 1}... ${percent.toFixed(1)}%`;
 
 
-        /*
-          Give the browser a tiny chance
-          to update the UI between parts.
-        */
-
         await new Promise(
           resolve =>
-            setTimeout(resolve, 0)
+            setTimeout(
+              resolve,
+              0
+            )
         );
 
       }
@@ -797,10 +878,12 @@
 
 
     parts.forEach(
-      (part, index) => {
+      (part) => {
 
         const div =
-          document.createElement("div");
+          document.createElement(
+            "div"
+          );
 
 
         div.className =
@@ -808,7 +891,9 @@
 
 
         const name =
-          document.createElement("div");
+          document.createElement(
+            "div"
+          );
 
 
         name.className =
@@ -820,7 +905,9 @@
 
 
         const size =
-          document.createElement("div");
+          document.createElement(
+            "div"
+          );
 
 
         size.className =
@@ -828,11 +915,15 @@
 
 
         size.textContent =
-          formatBytes(part.size);
+          formatBytes(
+            part.size
+          );
 
 
         const button =
-          document.createElement("button");
+          document.createElement(
+            "button"
+          );
 
 
         button.textContent =
@@ -851,14 +942,22 @@
         );
 
 
-        div.appendChild(name);
+        div.appendChild(
+          name
+        );
 
-        div.appendChild(size);
+        div.appendChild(
+          size
+        );
 
-        div.appendChild(button);
+        div.appendChild(
+          button
+        );
 
 
-        partsList.appendChild(div);
+        partsList.appendChild(
+          div
+        );
 
       }
     );
@@ -867,10 +966,12 @@
 
 
   /* =========================================================
-     DOWNLOAD ONE PART
+     DOWNLOAD PART
   ========================================================= */
 
-  function downloadPart(part) {
+  function downloadPart(
+    part
+  ) {
 
     const url =
       URL.createObjectURL(
@@ -879,7 +980,9 @@
 
 
     const a =
-      document.createElement("a");
+      document.createElement(
+        "a"
+      );
 
 
     a.href =
@@ -890,7 +993,9 @@
       part.name;
 
 
-    document.body.appendChild(a);
+    document.body.appendChild(
+      a
+    );
 
 
     a.click();
@@ -900,7 +1005,10 @@
 
 
     setTimeout(
-      () => URL.revokeObjectURL(url),
+      () =>
+        URL.revokeObjectURL(
+          url
+        ),
       1000
     );
 
@@ -928,17 +1036,17 @@
         const part of parts
       ) {
 
-        downloadPart(part);
+        downloadPart(
+          part
+        );
 
-
-        /*
-          Small delay so the browser
-          doesn't block all downloads.
-        */
 
         await new Promise(
           resolve =>
-            setTimeout(resolve, 1200)
+            setTimeout(
+              resolve,
+              1200
+            )
         );
 
       }
@@ -967,7 +1075,7 @@
 
 
   /* =========================================================
-     START DRIVE UPLOAD
+     UPLOAD TO GOOGLE DRIVE
   ========================================================= */
 
   uploadDriveButton.addEventListener(
@@ -1014,12 +1122,20 @@
         "Starting upload...";
 
 
+      uploadStatus.className =
+        "upload-file-status";
+
+
       try {
 
         const totalBytes =
           parts.reduce(
-            (sum, part) =>
-              sum + part.size,
+            (
+              sum,
+              part
+            ) =>
+              sum +
+              part.size,
             0
           );
 
@@ -1043,9 +1159,13 @@
 
 
           await uploadPartToDrive(
+
             part,
+
             uploadedBeforeCurrent,
+
             totalBytes
+
           );
 
 
@@ -1077,7 +1197,9 @@
 
       } catch (error) {
 
-        console.error(error);
+        console.error(
+          error
+        );
 
 
         uploadStatus.textContent =
@@ -1112,18 +1234,10 @@
     totalBytes
   ) {
 
-    /*
-      Google recommends resumable uploads
-      for large files.
-
-      16 MB is used here.
-
-      16 MB is a multiple of 256 KB,
-      which satisfies Drive's chunk requirement.
-    */
-
     const CHUNK_SIZE =
-      16 * 1024 * 1024;
+      16 *
+      1024 *
+      1024;
 
 
     const sessionUrl =
@@ -1138,12 +1252,14 @@
 
 
     while (
-      start < part.size
+      start <
+      part.size
     ) {
 
       const end =
         Math.min(
-          start + CHUNK_SIZE,
+          start +
+          CHUNK_SIZE,
           part.size
         );
 
@@ -1164,32 +1280,29 @@
           await fetch(
             sessionUrl,
             {
-              method: "PUT",
+
+              method:
+                "PUT",
 
               headers: {
 
                 "Content-Length":
-                  chunk.size,
+                  String(
+                    chunk.size
+                  ),
 
                 "Content-Range":
                   `bytes ${start}-${end - 1}/${part.size}`
 
               },
 
-              body: chunk
+              body:
+                chunk
 
             }
           );
 
       } catch (networkError) {
-
-        /*
-          The request may have reached Google
-          even if the browser didn't receive
-          the response.
-
-          Ask Google where the upload stopped.
-        */
 
         start =
           await getResumePosition(
@@ -1203,15 +1316,9 @@
 
 
       if (
-        response.status === 308
+        response.status ===
+        308
       ) {
-
-        /*
-          Don't blindly assume Google received
-          the entire chunk.
-
-          Read the Range header.
-        */
 
         const range =
           response.headers.get(
@@ -1230,7 +1337,9 @@
           if (match) {
 
             start =
-              Number(match[1]) + 1;
+              Number(
+                match[1]
+              ) + 1;
 
           } else {
 
@@ -1248,10 +1357,14 @@
 
 
         updateUploadProgress(
+
           uploadedBeforeCurrent +
           start,
+
           totalBytes,
+
           part.name
+
         );
 
 
@@ -1261,15 +1374,21 @@
 
 
       if (
-        response.status === 200 ||
-        response.status === 201
+        response.status ===
+          200 ||
+        response.status ===
+          201
       ) {
 
         updateUploadProgress(
+
           uploadedBeforeCurrent +
           part.size,
+
           totalBytes,
+
           part.name
+
         );
 
 
@@ -1278,17 +1397,14 @@
       }
 
 
-      /*
-        Temporary server errors.
-        Try to resume instead of restarting.
-      */
-
       if (
         response.status >= 500 &&
         response.status <= 599
       ) {
 
-        await sleep(1500);
+        await sleep(
+          1500
+        );
 
 
         start =
@@ -1303,22 +1419,21 @@
       }
 
 
-      /*
-        Unauthorized token.
-      */
-
       if (
-        response.status === 401
+        response.status ===
+        401
       ) {
 
         throw new Error(
-          "Google authorization expired. Please reconnect Google Drive and try again."
+          "Google authorization expired. Please reconnect Google Drive."
         );
 
       }
 
 
-      let errorText = "";
+      let errorText =
+        "";
+
 
       try {
 
@@ -1338,7 +1453,7 @@
 
 
   /* =========================================================
-     INITIATE RESUMABLE UPLOAD
+     START RESUMABLE UPLOAD
   ========================================================= */
 
   async function initiateResumableUpload(
@@ -1355,7 +1470,8 @@
         "https://www.googleapis.com/upload/drive/v3/files?uploadType=resumable",
         {
 
-          method: "POST",
+          method:
+            "POST",
 
           headers: {
 
@@ -1369,24 +1485,30 @@
               mimeType,
 
             "X-Upload-Content-Length":
-              blob.size
+              String(
+                blob.size
+              )
 
           },
 
-          body: JSON.stringify({
+          body:
+            JSON.stringify({
 
-            name: fileName,
+              name:
+                fileName,
 
-            mimeType: mimeType
+              mimeType:
+                mimeType
 
-          })
+            })
 
         }
       );
 
 
     if (
-      response.status === 401
+      response.status ===
+      401
     ) {
 
       throw new Error(
@@ -1396,9 +1518,13 @@
     }
 
 
-    if (!response.ok) {
+    if (
+      !response.ok
+    ) {
 
-      let errorText = "";
+      let errorText =
+        "";
+
 
       try {
 
@@ -1436,7 +1562,7 @@
 
 
   /* =========================================================
-     GET RESUME POSITION
+     RESUME POSITION
   ========================================================= */
 
   async function getResumePosition(
@@ -1449,7 +1575,8 @@
         sessionUrl,
         {
 
-          method: "PUT",
+          method:
+            "PUT",
 
           headers: {
 
@@ -1462,14 +1589,11 @@
       );
 
 
-    /*
-      200 / 201 means the upload
-      actually completed.
-    */
-
     if (
-      response.status === 200 ||
-      response.status === 201
+      response.status ===
+        200 ||
+      response.status ===
+        201
     ) {
 
       return totalSize;
@@ -1477,12 +1601,9 @@
     }
 
 
-    /*
-      308 means continue.
-    */
-
     if (
-      response.status === 308
+      response.status ===
+      308
     ) {
 
       const range =
@@ -1492,9 +1613,7 @@
 
 
       if (!range) {
-
         return 0;
-
       }
 
 
@@ -1505,21 +1624,22 @@
 
 
       if (!match) {
-
         return 0;
-
       }
 
 
       return (
-        Number(match[1]) + 1
+        Number(
+          match[1]
+        ) + 1
       );
 
     }
 
 
     if (
-      response.status === 404
+      response.status ===
+      404
     ) {
 
       throw new Error(
@@ -1537,7 +1657,7 @@
 
 
   /* =========================================================
-     UPDATE UPLOAD PROGRESS
+     UPLOAD PROGRESS
   ========================================================= */
 
   function updateUploadProgress(
@@ -1555,11 +1675,17 @@
 
 
     uploadProgressBar.style.width =
-      `${Math.min(percent, 100).toFixed(1)}%`;
+      `${Math.min(
+        percent,
+        100
+      ).toFixed(1)}%`;
 
 
     uploadStatus.textContent =
-      `${fileName} — ${Math.min(percent, 100).toFixed(1)}%`;
+      `${fileName} — ${Math.min(
+        percent,
+        100
+      ).toFixed(1)}%`;
 
   }
 
@@ -1568,10 +1694,16 @@
      HELPERS
   ========================================================= */
 
-  function formatBytes(bytes) {
+  function formatBytes(
+    bytes
+  ) {
 
-    if (bytes === 0) {
+    if (
+      bytes === 0
+    ) {
+
       return "0 Bytes";
+
     }
 
 
@@ -1592,8 +1724,12 @@
 
 
     return (
-      (bytes /
-        Math.pow(1024, i)
+      (
+        bytes /
+        Math.pow(
+          1024,
+          i
+        )
       ).toFixed(2)
       +
       " "
@@ -1604,7 +1740,9 @@
   }
 
 
-  function getExtension(name) {
+  function getExtension(
+    name
+  ) {
 
     const index =
       name.lastIndexOf(".");
@@ -1626,7 +1764,9 @@
   }
 
 
-  function getBaseName(name) {
+  function getBaseName(
+    name
+  ) {
 
     const index =
       name.lastIndexOf(".");
@@ -1649,7 +1789,9 @@
   }
 
 
-  function sleep(ms) {
+  function sleep(
+    ms
+  ) {
 
     return new Promise(
       resolve =>
@@ -1663,7 +1805,7 @@
 
 
   /* =========================================================
-     START GOOGLE AUTH
+     INIT
   ========================================================= */
 
   window.addEventListener(
@@ -1679,3 +1821,4 @@
 
 </body>
 </html>
+```
