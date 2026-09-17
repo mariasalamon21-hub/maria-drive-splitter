@@ -8,7 +8,9 @@
 <script src="https://accounts.google.com/gsi/client" async defer></script>
 
 <style>
-*{box-sizing:border-box}
+*{
+    box-sizing:border-box
+}
 
 body{
     margin:0;
@@ -31,7 +33,9 @@ body{
     box-shadow:0 3px 12px #00000012
 }
 
-h1{margin-bottom:8px}
+h1{
+    margin-bottom:8px
+}
 
 .subtitle{
     color:#666;
@@ -65,9 +69,13 @@ input,select{
     font-size:16px
 }
 
-.size-row input{flex:1}
+.size-row input{
+    flex:1
+}
 
-.size-row select{width:150px}
+.size-row select{
+    width:150px
+}
 
 button{
     border:0;
@@ -401,7 +409,6 @@ function formatBytes(bytes){
         + " "
         + units[i]
     );
-
 }
 
 
@@ -410,7 +417,6 @@ function sleep(ms){
     return new Promise(
         resolve => setTimeout(resolve,ms)
     );
-
 }
 
 
@@ -422,7 +428,6 @@ function setStatus(text,error=false){
     error
         ? "status error"
         : "status";
-
 }
 
 
@@ -437,7 +442,6 @@ function setProgress(percent,text){
     ) + "%";
 
     progressText.textContent = text;
-
 }
 
 
@@ -452,12 +456,11 @@ function setUploadProgress(percent,text){
     ) + "%";
 
     uploadText.textContent = text;
-
 }
 
 
 /* =====================================================
-   SIZE CONVERSION
+   SIZE
    ===================================================== */
 
 function convertToBytes(){
@@ -473,28 +476,21 @@ function convertToBytes(){
         throw new Error(
             "Enter a valid part size."
         );
-
     }
 
     const multiplier = {
 
         bit: 1 / 8,
-
         Byte: 1,
-
         KB: 1024,
-
         MB: 1024 ** 2,
-
         GB: 1024 ** 3,
-
         TB: 1024 ** 4
 
     };
 
     const bytes =
     value * multiplier[sizeUnit.value];
-
 
     if(
         !Number.isFinite(bytes) ||
@@ -504,12 +500,9 @@ function convertToBytes(){
         throw new Error(
             "Part size must be at least 1 Byte."
         );
-
     }
 
-
     return Math.floor(bytes);
-
 }
 
 
@@ -520,9 +513,7 @@ function convertToBytes(){
 function selectFile(file){
 
     if(!file){
-
         return;
-
     }
 
     selectedFile = file;
@@ -541,14 +532,11 @@ function selectFile(file){
     partsCard.classList.add("hidden");
 
     setStatus("");
-
 }
 
 
 dropZone.onclick = () => {
-
     fileInput.click();
-
 };
 
 
@@ -561,14 +549,11 @@ fileInput.onchange = () => {
         );
 
     }
-
 };
 
 
 dropZone.ondragover = e => {
-
     e.preventDefault();
-
 };
 
 
@@ -583,12 +568,11 @@ dropZone.ondrop = e => {
         );
 
     }
-
 };
 
 
 /* =====================================================
-   DIRECT FILE SPLITTING
+   DIRECT SPLIT
    ===================================================== */
 
 async function splitFile(
@@ -599,7 +583,6 @@ async function splitFile(
     parts = [];
 
     partsList.innerHTML = "";
-
 
     const total =
     Math.ceil(
@@ -616,7 +599,6 @@ async function splitFile(
         const start =
         i * partSize;
 
-
         const end =
         Math.min(
             start + partSize,
@@ -625,12 +607,15 @@ async function splitFile(
 
 
         /*
-         * IMPORTANT:
-         * file.slice() does NOT read the
-         * whole file into memory.
+         * THIS IS THE IMPORTANT PART:
          *
-         * It creates a Blob representing
-         * only this section of the original file.
+         * No ZIP.
+         * No 7z.
+         * No compression.
+         *
+         * This takes the original file
+         * and creates a Blob containing
+         * only this section.
          */
 
         const partBlob =
@@ -672,20 +657,13 @@ async function splitFile(
         );
 
 
-        /*
-         * Give the browser a chance
-         * to update the progress bar.
-         */
-
         await new Promise(
             requestAnimationFrame
         );
-
     }
 
 
     renderParts();
-
 }
 
 
@@ -735,7 +713,6 @@ function renderParts(){
 
 
         info.appendChild(name);
-
         info.appendChild(size);
 
 
@@ -757,7 +734,6 @@ function renderParts(){
 
 
         row.appendChild(info);
-
         row.appendChild(button);
 
         partsList.appendChild(row);
@@ -768,7 +744,6 @@ function renderParts(){
     uploadButton.disabled =
     !accessToken ||
     parts.length === 0;
-
 }
 
 
@@ -784,15 +759,11 @@ function downloadBlob(
     const url =
     URL.createObjectURL(blob);
 
-
     const a =
     document.createElement("a");
 
-
     a.href = url;
-
     a.download = name;
-
 
     document.body.appendChild(a);
 
@@ -806,35 +777,26 @@ function downloadBlob(
         URL.revokeObjectURL(url),
         1000
     );
-
 }
 
 
 /* =====================================================
-   START SPLITTING
+   START
    ===================================================== */
 
 startButton.onclick =
 async () => {
 
     if(!selectedFile){
-
         return;
-
     }
 
 
-    startButton.disabled =
-    true;
-
+    startButton.disabled = true;
 
     partsCard.classList.add(
         "hidden"
     );
-
-
-    progressFill.style.width =
-    "0%";
 
 
     try{
@@ -844,16 +806,13 @@ async () => {
 
 
         setStatus(
-            "Splitting the original file..."
+            "Splitting original file..."
         );
 
 
         await splitFile(
-
             selectedFile,
-
             partSize
-
         );
 
 
@@ -861,7 +820,7 @@ async () => {
 
             "Done! " +
             parts.length +
-            " parts created directly from the original file."
+            " parts created."
 
         );
 
@@ -869,10 +828,10 @@ async () => {
         uploadButton.disabled =
         !accessToken;
 
+
     }catch(error){
 
         console.error(error);
-
 
         setStatus(
 
@@ -885,8 +844,7 @@ async () => {
 
     }finally{
 
-        startButton.disabled =
-        false;
+        startButton.disabled = false;
 
     }
 
@@ -900,11 +858,9 @@ async () => {
 function initGoogle(){
 
     if(
-
         !window.google ||
         !google.accounts ||
         !google.accounts.oauth2
-
     ){
 
         setTimeout(
@@ -913,7 +869,6 @@ function initGoogle(){
         );
 
         return;
-
     }
 
 
@@ -952,7 +907,6 @@ function initGoogle(){
 
                 uploadButton.disabled =
                 parts.length === 0;
-
             }
 
         }
@@ -967,7 +921,6 @@ googleButton.onclick = () => {
     if(!googleTokenClient){
 
         initGoogle();
-
 
         setTimeout(() => {
 
@@ -987,9 +940,7 @@ googleButton.onclick = () => {
 
         },700);
 
-
         return;
-
     }
 
 
@@ -1024,15 +975,13 @@ async () => {
         );
 
         await sleep(300);
-
     }
 
 };
 
 
 /* =====================================================
-   GOOGLE DRIVE
-   RESUMABLE UPLOAD SESSION
+   GOOGLE DRIVE UPLOAD SESSION
    ===================================================== */
 
 async function createUploadSession(
@@ -1089,7 +1038,6 @@ async function createUploadSession(
         throw new Error(
             "Google authorization expired. Please reconnect Google Drive."
         );
-
     }
 
 
@@ -1106,7 +1054,6 @@ async function createUploadSession(
             text
 
         );
-
     }
 
 
@@ -1121,17 +1068,15 @@ async function createUploadSession(
         throw new Error(
             "Google Drive did not return an upload URL."
         );
-
     }
 
 
     return location;
-
 }
 
 
 /* =====================================================
-   GET CURRENT UPLOAD POSITION
+   CHECK UPLOAD POSITION
    ===================================================== */
 
 async function getUploadedPosition(
@@ -1188,14 +1133,11 @@ async function getUploadedPosition(
                 return (
                     Number(match[1]) + 1
                 );
-
             }
-
         }
 
 
         return 0;
-
     }
 
 
@@ -1205,26 +1147,15 @@ async function getUploadedPosition(
     ){
 
         return totalSize;
-
-    }
-
-
-    if(
-        response.status === 404
-    ){
-
-        return 0;
-
     }
 
 
     return 0;
-
 }
 
 
 /* =====================================================
-   UPLOAD ONE PART
+   UPLOAD PART
    ===================================================== */
 
 async function uploadPart(
@@ -1241,10 +1172,6 @@ async function uploadPart(
     );
 
 
-    /*
-     * 16 MiB chunks.
-     */
-
     const chunkSize =
     16 * 1024 * 1024;
 
@@ -1258,12 +1185,8 @@ async function uploadPart(
 
         const end =
         Math.min(
-
-            position +
-            chunkSize,
-
+            position + chunkSize,
             part.size
-
         );
 
 
@@ -1312,11 +1235,6 @@ async function uploadPart(
 
         }catch(error){
 
-            /*
-             * Network interruption.
-             * Ask Google how much was received.
-             */
-
             await sleep(1500);
 
             position =
@@ -1326,7 +1244,6 @@ async function uploadPart(
             );
 
             continue;
-
         }
 
 
@@ -1337,14 +1254,8 @@ async function uploadPart(
             throw new Error(
                 "Google authorization expired. Please reconnect Google Drive."
             );
-
         }
 
-
-        /*
-         * 308 = Google received the chunk
-         * but the complete file is not finished.
-         */
 
         if(
             response.status === 308
@@ -1401,13 +1312,8 @@ async function uploadPart(
 
 
             continue;
-
         }
 
-
-        /*
-         * 200 / 201 = upload completed.
-         */
 
         if(
             response.status === 200 ||
@@ -1437,13 +1343,8 @@ async function uploadPart(
 
 
             continue;
-
         }
 
-
-        /*
-         * Temporary Google server errors.
-         */
 
         if(
             response.status >= 500
@@ -1458,7 +1359,6 @@ async function uploadPart(
             );
 
             continue;
-
         }
 
 
@@ -1468,9 +1368,7 @@ async function uploadPart(
 
         throw new Error(
 
-            `Upload failed for part ${index + 1}. ` +
-            `Status: ${response.status}\n` +
-            errorText
+            `Upload failed for part ${index + 1}. Status: ${response.status}\n${errorText}`
 
         );
 
@@ -1492,16 +1390,11 @@ async () => {
     ){
 
         return;
-
     }
 
 
-    uploadButton.disabled =
-    true;
-
-
-    downloadAll.disabled =
-    true;
+    uploadButton.disabled = true;
+    downloadAll.disabled = true;
 
 
     const totalBytes =
@@ -1517,16 +1410,9 @@ async () => {
 
     try{
 
-        uploadProgress.style.display =
-        "block";
-
-
         setUploadProgress(
-
             0,
-
             "Starting upload..."
-
         );
 
 
@@ -1555,13 +1441,9 @@ async () => {
             await uploadPart(
 
                 part,
-
                 i,
-
                 parts.length,
-
                 completedBytes,
-
                 totalBytes
 
             );
@@ -1586,16 +1468,15 @@ async () => {
 
 
         setUploadProgress(
-
             100,
-
             "All parts uploaded successfully."
-
         );
 
 
-        status.textContent =
-        "All parts uploaded to Google Drive.";
+        setStatus(
+            "All parts uploaded to Google Drive.",
+            false
+        );
 
         status.className =
         "status success";
@@ -1606,16 +1487,17 @@ async () => {
         console.error(error);
 
 
-        uploadText.textContent =
-        "Upload stopped.";
+        setUploadProgress(
+            0,
+            "Upload stopped."
+        );
 
 
-        status.textContent =
-        error.message ||
-        "Upload failed.";
-
-        status.className =
-        "status error";
+        setStatus(
+            error.message ||
+            "Upload failed.",
+            true
+        );
 
 
     }finally{
@@ -1624,8 +1506,7 @@ async () => {
         !accessToken ||
         parts.length === 0;
 
-        downloadAll.disabled =
-        false;
+        downloadAll.disabled = false;
 
     }
 
