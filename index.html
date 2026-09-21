@@ -2,104 +2,431 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Local File Copy Test</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Maria Drive Splitter</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      padding: 20px;
+      font-family: Arial, sans-serif;
+      background: #f5f7fb;
+      color: #222;
+    }
+
+    .container {
+      max-width: 950px;
+      margin: auto;
+    }
+
+    h1 {
+      text-align: center;
+      margin-bottom: 8px;
+    }
+
+    .subtitle {
+      text-align: center;
+      color: #666;
+      margin-bottom: 25px;
+    }
+
+    .card {
+      background: white;
+      border-radius: 16px;
+      padding: 22px;
+      margin-bottom: 20px;
+      box-shadow: 0 4px 18px rgba(0,0,0,.08);
+    }
+
+    h2 {
+      margin-top: 0;
+    }
+
+    button {
+      border: 0;
+      border-radius: 10px;
+      padding: 11px 16px;
+      cursor: pointer;
+      font-size: 15px;
+      background: #2563eb;
+      color: white;
+      margin: 5px 3px;
+    }
+
+    button:hover {
+      opacity: .9;
+    }
+
+    button:disabled {
+      opacity: .5;
+      cursor: not-allowed;
+    }
+
+    .green {
+      background: #16a34a;
+    }
+
+    .orange {
+      background: #ea580c;
+    }
+
+    .gray {
+      background: #64748b;
+    }
+
+    .red {
+      background: #dc2626;
+    }
+
+    input,
+    select {
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      font-size: 15px;
+    }
+
+    .row {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .info {
+      background: #f1f5f9;
+      padding: 12px;
+      border-radius: 10px;
+      margin: 12px 0;
+      word-break: break-word;
+    }
+
+    .status {
+      background: #eef2ff;
+      padding: 12px;
+      border-radius: 10px;
+      margin-top: 12px;
+      word-break: break-word;
+    }
+
+    .success {
+      background: #dcfce7;
+      color: #166534;
+    }
+
+    .error {
+      background: #fee2e2;
+      color: #991b1b;
+    }
+
+    .progress {
+      height: 12px;
+      background: #e5e7eb;
+      border-radius: 20px;
+      overflow: hidden;
+      margin: 10px 0;
+    }
+
+    .progress-bar {
+      height: 100%;
+      width: 0%;
+      background: #2563eb;
+      transition: width .15s;
+    }
+
+    .part {
+      border: 1px solid #ddd;
+      border-radius: 10px;
+      padding: 12px;
+      margin-top: 10px;
+      background: #fafafa;
+    }
+
+    .part-name {
+      font-weight: bold;
+      word-break: break-all;
+    }
+
+    .merge-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      border: 1px solid #ddd;
+      border-radius: 10px;
+      padding: 10px;
+      margin-top: 8px;
+      background: #fafafa;
+    }
+
+    .merge-name {
+      flex: 1;
+      word-break: break-all;
+    }
+
+    .move {
+      background: #475569;
+      padding: 7px 11px;
+      margin: 0;
+    }
+
+    .hidden {
+      display: none;
+    }
+
+    .big-progress {
+      margin-top: 15px;
+    }
+
+    .progress-text {
+      font-weight: bold;
+      margin-top: 8px;
+    }
+
+    .copy-box {
+      border: 2px dashed #cbd5e1;
+      border-radius: 12px;
+      padding: 15px;
+      margin-top: 12px;
+    }
+
+    @media(max-width:600px) {
+      body {
+        padding: 10px;
+      }
+
+      .card {
+        padding: 16px;
+      }
+
+      .merge-row {
+        flex-wrap: wrap;
+      }
+
+      .merge-name {
+        min-width: 100%;
+      }
+    }
+  </style>
 </head>
 
 <body>
 
-<h2>🧪 Local Copy Test</h2>
+<div class="container">
 
-<p>
-  اختاري ملف من جهازك، وبعدها اختاري فولدر تاني.
-  الموقع هيعمل Copy مباشر للفولدر، بدون Download.
-</p>
+  <h1>Maria Drive Splitter</h1>
 
-<button id="copyBtn">
-  📁 Select File & Copy
-</button>
+  <div class="subtitle">
+    Split • Merge • Copy • Paste
+  </div>
 
-<div id="status"></div>
+
+  <!-- =====================================================
+       SPLIT
+  ====================================================== -->
+
+  <div class="card">
+
+    <h2>✂️ Split</h2>
+
+    <button onclick="selectSplitFile()">
+      📁 Select File
+    </button>
+
+    <div id="splitFileInfo" class="info">
+      No file selected.
+    </div>
+
+    <div class="row">
+
+      <input
+        id="splitSize"
+        type="number"
+        min="1"
+        step="any"
+        placeholder="Part size"
+      >
+
+      <select id="splitUnit">
+        <option value="byte">Byte</option>
+        <option value="KB">KB</option>
+        <option value="MB" selected>MB</option>
+        <option value="GB">GB</option>
+        <option value="TB">TB</option>
+      </select>
+
+    </div>
+
+    <button
+      class="green"
+      onclick="splitAndPaste()"
+    >
+      ✂️ Split & Paste
+    </button>
+
+    <div id="splitStatus" class="status">
+      Select a file to begin.
+    </div>
+
+    <div class="progress">
+      <div
+        id="splitProgress"
+        class="progress-bar"
+      ></div>
+    </div>
+
+    <div id="splitProgressText"
+         class="progress-text"></div>
+
+    <div id="partsList"></div>
+
+  </div>
+
+
+  <!-- =====================================================
+       MERGE
+  ====================================================== -->
+
+  <div class="card">
+
+    <h2>🔗 Merge</h2>
+
+    <button onclick="selectMergeFiles()">
+      📁 Select Parts
+    </button>
+
+    <div class="info">
+      Select the parts from your device, then use ↑ ↓ to put
+      them in the correct order.
+    </div>
+
+    <div id="mergeList"></div>
+
+    <button
+      class="green"
+      onclick="mergeAndPaste()"
+    >
+      🔗 Merge & Paste
+    </button>
+
+    <div id="mergeStatus" class="status">
+      No parts selected.
+    </div>
+
+    <div class="progress">
+      <div
+        id="mergeProgress"
+        class="progress-bar"
+      ></div>
+    </div>
+
+    <div id="mergeProgressText"
+         class="progress-text"></div>
+
+  </div>
+
+
+  <!-- =====================================================
+       COPY
+  ====================================================== -->
+
+  <div class="card">
+
+    <h2>📋 Copy</h2>
+
+    <p>
+      Choose a file or folder. The website will remember it
+      as the item to paste.
+    </p>
+
+    <button onclick="copyFile()">
+      📋 Copy File
+    </button>
+
+    <button
+      class="orange"
+      onclick="copyFolder()"
+    >
+      📋 Copy Folder
+    </button>
+
+    <div
+      id="copyStatus"
+      class="status"
+    >
+      Nothing copied.
+    </div>
+
+  </div>
+
+
+  <!-- =====================================================
+       PASTE
+  ====================================================== -->
+
+  <div class="card">
+
+    <h2>📌 Paste</h2>
+
+    <p>
+      Choose the destination folder, then paste the item
+      you copied.
+    </p>
+
+    <button
+      class="green"
+      onclick="pasteItem()"
+    >
+      📌 Paste
+    </button>
+
+    <div
+      id="pasteStatus"
+      class="status"
+    >
+      Nothing to paste.
+    </div>
+
+    <div class="progress">
+      <div
+        id="copyProgress"
+        class="progress-bar"
+      ></div>
+    </div>
+
+    <div
+      id="copyProgressText"
+      class="progress-text"
+    ></div>
+
+  </div>
+
+</div>
+
 
 <script>
-document.getElementById("copyBtn").addEventListener("click", async () => {
 
-  try {
+/* ==========================================================
+   GLOBAL STATE
+========================================================== */
 
-    // 1. اختيار الملف
-    const [fileHandle] =
-      await window.showOpenFilePicker({
-        multiple: false
-      });
+let splitFileHandle = null;
 
-    const file =
-      await fileHandle.getFile();
+let mergeFiles = [];
 
-    // 2. اختيار فولدر الوجهة
-    const folderHandle =
-      await window.showDirectoryPicker();
+let copiedItem = null;
 
-    document.getElementById("status").textContent =
-      "Copying...";
 
-    // 3. إنشاء ملف بنفس الاسم في الفولدر
-    const newFileHandle =
-      await folderHandle.getFileHandle(
-        file.name,
-        {
-          create: true
-        }
-      );
-
-    // 4. فتح الملف للكتابة
-    const writable =
-      await newFileHandle.createWritable();
-
-    // 5. نسخ البيانات على أجزاء
-    const reader =
-      file.stream().getReader();
-
-    let copied = 0;
-
-    while (true) {
-
-      const {
-        value,
-        done
-      } = await reader.read();
-
-      if (done) break;
-
-      await writable.write(value);
-
-      copied += value.byteLength;
-
-      const percent =
-        ((copied / file.size) * 100).toFixed(1);
-
-      document.getElementById("status").textContent =
-        `Copying... ${percent}% — ` +
-        `${formatBytes(copied)} / ${formatBytes(file.size)}`;
-    }
-
-    // 6. إنهاء الكتابة
-    await writable.close();
-
-    document.getElementById("status").textContent =
-      `✅ Done! ${file.name} was copied successfully.`;
-
-  } catch (error) {
-
-    console.error(error);
-
-    document.getElementById("status").textContent =
-      "❌ " + error.message;
-  }
-});
-
+/* ==========================================================
+   BASIC HELPERS
+========================================================== */
 
 function formatBytes(bytes) {
 
-  if (bytes === 0) return "0 Bytes";
+  if (!bytes) return "0 Bytes";
 
   const units = [
     "Bytes",
@@ -120,6 +447,1170 @@ function formatBytes(bytes) {
   " " +
   units[i];
 }
+
+
+function sleep(ms) {
+
+  return new Promise(
+    resolve => setTimeout(resolve, ms)
+  );
+}
+
+
+function setStatus(
+  id,
+  text,
+  type = ""
+) {
+
+  const el =
+    document.getElementById(id);
+
+  el.textContent = text;
+
+  el.className =
+    "status " + type;
+}
+
+
+function setProgress(
+  barId,
+  textId,
+  percent,
+  text
+) {
+
+  document.getElementById(barId)
+    .style.width =
+    Math.max(
+      0,
+      Math.min(100, percent)
+    ) + "%";
+
+  document.getElementById(textId)
+    .textContent =
+    text;
+}
+
+
+/* ==========================================================
+   SPLIT — SELECT FILE
+========================================================== */
+
+async function selectSplitFile() {
+
+  if (!window.showOpenFilePicker) {
+
+    setStatus(
+      "splitStatus",
+      "Your browser does not support File System Access API. Use Chrome or Edge on desktop.",
+      "error"
+    );
+
+    return;
+  }
+
+  try {
+
+    const handles =
+      await window.showOpenFilePicker({
+        multiple: false
+      });
+
+    splitFileHandle =
+      handles[0];
+
+    const file =
+      await splitFileHandle.getFile();
+
+    document.getElementById(
+      "splitFileInfo"
+    ).innerHTML =
+      `<strong>${escapeHtml(file.name)}</strong><br>
+       ${formatBytes(file.size)}`;
+
+    setStatus(
+      "splitStatus",
+      "File selected. Choose the part size."
+    );
+
+  } catch (error) {
+
+    if (error.name === "AbortError") return;
+
+    setStatus(
+      "splitStatus",
+      error.message,
+      "error"
+    );
+  }
+}
+
+
+/* ==========================================================
+   SPLIT SIZE
+========================================================== */
+
+function getSplitSize() {
+
+  const value =
+    Number(
+      document.getElementById(
+        "splitSize"
+      ).value
+    );
+
+  const unit =
+    document.getElementById(
+      "splitUnit"
+    ).value;
+
+  if (
+    !Number.isFinite(value) ||
+    value <= 0
+  ) {
+    return null;
+  }
+
+  const multipliers = {
+
+    byte: 1,
+
+    KB: 1024,
+
+    MB: 1024 ** 2,
+
+    GB: 1024 ** 3,
+
+    TB: 1024 ** 4
+
+  };
+
+  return Math.floor(
+    value * multipliers[unit]
+  );
+}
+
+
+/* ==========================================================
+   SPLIT + PASTE
+========================================================== */
+
+async function splitAndPaste() {
+
+  if (!splitFileHandle) {
+
+    setStatus(
+      "splitStatus",
+      "Select a file first.",
+      "error"
+    );
+
+    return;
+  }
+
+  const partSize =
+    getSplitSize();
+
+  if (!partSize) {
+
+    setStatus(
+      "splitStatus",
+      "Enter a valid part size.",
+      "error"
+    );
+
+    return;
+  }
+
+  try {
+
+    /*
+      USER CHOOSES DESTINATION FOLDER
+    */
+
+    const destination =
+      await window.showDirectoryPicker({
+        mode: "readwrite"
+      });
+
+    const file =
+      await splitFileHandle.getFile();
+
+    const totalSize =
+      file.size;
+
+    let offset = 0;
+
+    let partNumber = 1;
+
+    const createdParts = [];
+
+    const startTime =
+      performance.now();
+
+    setStatus(
+      "splitStatus",
+      "Splitting and copying directly to the selected folder..."
+    );
+
+    while (offset < totalSize) {
+
+      const end =
+        Math.min(
+          offset + partSize,
+          totalSize
+        );
+
+      const partName =
+        file.name +
+        ".part" +
+        String(partNumber).padStart(3, "0");
+
+
+      /*
+        CREATE DESTINATION FILE
+      */
+
+      const outputHandle =
+        await destination.getFileHandle(
+          partName,
+          {
+            create: true
+          }
+        );
+
+
+      const writable =
+        await outputHandle.createWritable();
+
+
+      /*
+        READ ONLY THIS PART
+      */
+
+      const part =
+        file.slice(
+          offset,
+          end
+        );
+
+
+      const reader =
+        part.stream().getReader();
+
+
+      while (true) {
+
+        const {
+          value,
+          done
+        } =
+          await reader.read();
+
+        if (done) break;
+
+        await writable.write(value);
+
+        const written =
+          offset +
+          Math.min(
+            value.byteLength,
+            end - offset
+          );
+
+        const percent =
+          (written / totalSize) * 100;
+
+        const elapsed =
+          (performance.now() - startTime) / 1000;
+
+        const speed =
+          elapsed > 0
+            ? written / elapsed
+            : 0;
+
+        const remaining =
+          totalSize - written;
+
+        const eta =
+          speed > 0
+            ? remaining / speed
+            : 0;
+
+        setProgress(
+          "splitProgress",
+          "splitProgressText",
+          percent,
+
+          `${percent.toFixed(1)}% — ` +
+          `${formatBytes(written)} / ${formatBytes(totalSize)} — ` +
+          `Remaining: ${formatBytes(remaining)} — ` +
+          `Speed: ${formatBytes(speed)}/s — ` +
+          `ETA: ${formatTime(eta)}`
+        );
+      }
+
+
+      await writable.close();
+
+
+      createdParts.push(partName);
+
+      offset = end;
+
+      partNumber++;
+    }
+
+
+    setProgress(
+      "splitProgress",
+      "splitProgressText",
+      100,
+
+      `100% — ${formatBytes(totalSize)} / ${formatBytes(totalSize)} — Done`
+    );
+
+
+    setStatus(
+      "splitStatus",
+      `✅ Done. Created ${createdParts.length} parts directly in the selected folder.`,
+      "success"
+    );
+
+
+    document.getElementById(
+      "partsList"
+    ).innerHTML =
+      createdParts
+        .map(
+          name =>
+            `<div class="part">
+              <div class="part-name">
+                ${escapeHtml(name)}
+              </div>
+              <div>✓ Created locally</div>
+            </div>`
+        )
+        .join("");
+
+  } catch (error) {
+
+    if (error.name === "AbortError") {
+
+      setStatus(
+        "splitStatus",
+        "Operation cancelled."
+      );
+
+      return;
+    }
+
+    console.error(error);
+
+    setStatus(
+      "splitStatus",
+      error.message,
+      "error"
+    );
+  }
+}
+
+
+/* ==========================================================
+   MERGE — SELECT PARTS
+========================================================== */
+
+async function selectMergeFiles() {
+
+  if (!window.showOpenFilePicker) {
+
+    setStatus(
+      "mergeStatus",
+      "Use Chrome or Edge on desktop.",
+      "error"
+    );
+
+    return;
+  }
+
+  try {
+
+    const handles =
+      await window.showOpenFilePicker({
+        multiple: true
+      });
+
+    mergeFiles =
+      handles;
+
+    renderMergeFiles();
+
+    validateMergeOrder();
+
+  } catch (error) {
+
+    if (error.name === "AbortError") return;
+
+    setStatus(
+      "mergeStatus",
+      error.message,
+      "error"
+    );
+  }
+}
+
+
+function parsePartName(name) {
+
+  const match =
+    name.match(
+      /\.part(\d+)$/i
+    );
+
+  if (!match) return null;
+
+  return {
+
+    number:
+      Number(match[1]),
+
+    originalName:
+      name.replace(
+        /\.part\d+$/i,
+        ""
+      )
+
+  };
+}
+
+
+function renderMergeFiles() {
+
+  const container =
+    document.getElementById(
+      "mergeList"
+    );
+
+  container.innerHTML = "";
+
+  mergeFiles.forEach(
+    (handle, index) => {
+
+      const row =
+        document.createElement(
+          "div"
+        );
+
+      row.className =
+        "merge-row";
+
+      row.innerHTML = `
+
+        <strong>
+          ${String(index + 1).padStart(3,"0")}
+        </strong>
+
+        <div class="merge-name">
+          ${escapeHtml(handle.name)}
+        </div>
+
+        <button
+          class="move"
+          onclick="moveMerge(${index},-1)"
+          ${index === 0 ? "disabled" : ""}
+        >
+          ↑
+        </button>
+
+        <button
+          class="move"
+          onclick="moveMerge(${index},1)"
+          ${index === mergeFiles.length - 1 ? "disabled" : ""}
+        >
+          ↓
+        </button>
+
+      `;
+
+      container.appendChild(row);
+    }
+  );
+}
+
+
+function moveMerge(index, direction) {
+
+  const newIndex =
+    index + direction;
+
+  if (
+    newIndex < 0 ||
+    newIndex >= mergeFiles.length
+  ) {
+    return;
+  }
+
+  const temp =
+    mergeFiles[index];
+
+  mergeFiles[index] =
+    mergeFiles[newIndex];
+
+  mergeFiles[newIndex] =
+    temp;
+
+  renderMergeFiles();
+
+  validateMergeOrder();
+}
+
+
+async function validateMergeOrder() {
+
+  if (!mergeFiles.length) {
+
+    setStatus(
+      "mergeStatus",
+      "No parts selected."
+    );
+
+    return false;
+  }
+
+  const parsed =
+    mergeFiles.map(
+      handle =>
+        parsePartName(handle.name)
+    );
+
+  if (
+    parsed.some(
+      item => !item
+    )
+  ) {
+
+    setStatus(
+      "mergeStatus",
+      "Every file must end with .part001, .part002, etc.",
+      "error"
+    );
+
+    return false;
+  }
+
+  for (
+    let i = 0;
+    i < parsed.length;
+    i++
+  ) {
+
+    if (
+      parsed[i].number !== i + 1
+    ) {
+
+      setStatus(
+        "mergeStatus",
+        `Wrong order at position ${i + 1}. Use ↑ and ↓.`,
+        "error"
+      );
+
+      return false;
+    }
+  }
+
+  setStatus(
+    "mergeStatus",
+    "Parts are in the correct order.",
+    "success"
+  );
+
+  return true;
+}
+
+
+/* ==========================================================
+   MERGE + PASTE
+========================================================== */
+
+async function mergeAndPaste() {
+
+  if (
+    !(await validateMergeOrder())
+  ) {
+    return;
+  }
+
+  try {
+
+    const destination =
+      await window.showDirectoryPicker({
+        mode: "readwrite"
+      });
+
+    const first =
+      await mergeFiles[0].getFile();
+
+    const originalName =
+      parsePartName(
+        first.name
+      ).originalName;
+
+
+    const outputHandle =
+      await destination.getFileHandle(
+        originalName,
+        {
+          create: true
+        }
+      );
+
+
+    const writable =
+      await outputHandle.createWritable();
+
+
+    let totalSize = 0;
+
+    const fileObjects = [];
+
+    for (
+      const handle of mergeFiles
+    ) {
+
+      const file =
+        await handle.getFile();
+
+      fileObjects.push(file);
+
+      totalSize += file.size;
+    }
+
+
+    let writtenTotal = 0;
+
+    const startTime =
+      performance.now();
+
+
+    for (
+      let i = 0;
+      i < fileObjects.length;
+      i++
+    ) {
+
+      const file =
+        fileObjects[i];
+
+      const reader =
+        file.stream().getReader();
+
+
+      while (true) {
+
+        const {
+          value,
+          done
+        } =
+          await reader.read();
+
+        if (done) break;
+
+        await writable.write(value);
+
+        writtenTotal +=
+          value.byteLength;
+
+
+        const percent =
+          (writtenTotal / totalSize) * 100;
+
+        const elapsed =
+          (performance.now() - startTime) / 1000;
+
+        const speed =
+          elapsed > 0
+            ? writtenTotal / elapsed
+            : 0;
+
+        const remaining =
+          totalSize - writtenTotal;
+
+        const eta =
+          speed > 0
+            ? remaining / speed
+            : 0;
+
+
+        setProgress(
+          "mergeProgress",
+          "mergeProgressText",
+          percent,
+
+          `${percent.toFixed(1)}% — ` +
+          `${formatBytes(writtenTotal)} / ${formatBytes(totalSize)} — ` +
+          `Remaining: ${formatBytes(remaining)} — ` +
+          `Speed: ${formatBytes(speed)}/s — ` +
+          `ETA: ${formatTime(eta)}`
+        );
+      }
+    }
+
+
+    await writable.close();
+
+
+    setProgress(
+      "mergeProgress",
+      "mergeProgressText",
+      100,
+
+      `100% — ${formatBytes(totalSize)} / ${formatBytes(totalSize)} — Done`
+    );
+
+
+    setStatus(
+      "mergeStatus",
+      `✅ ${originalName} created directly in the selected folder.`,
+      "success"
+    );
+
+  } catch (error) {
+
+    if (error.name === "AbortError") {
+
+      setStatus(
+        "mergeStatus",
+        "Operation cancelled."
+      );
+
+      return;
+    }
+
+    console.error(error);
+
+    setStatus(
+      "mergeStatus",
+      error.message,
+      "error"
+    );
+  }
+}
+
+
+/* ==========================================================
+   COPY
+========================================================== */
+
+async function copyFile() {
+
+  try {
+
+    const handles =
+      await window.showOpenFilePicker({
+        multiple: false
+      });
+
+    copiedItem = {
+
+      type: "file",
+
+      handle: handles[0]
+
+    };
+
+
+    setStatus(
+      "copyStatus",
+      `📋 File copied: ${handles[0].name}`,
+      "success"
+    );
+
+  } catch (error) {
+
+    if (error.name === "AbortError") return;
+
+    setStatus(
+      "copyStatus",
+      error.message,
+      "error"
+    );
+  }
+}
+
+
+async function copyFolder() {
+
+  try {
+
+    const handle =
+      await window.showDirectoryPicker();
+
+    copiedItem = {
+
+      type: "directory",
+
+      handle
+
+    };
+
+
+    setStatus(
+      "copyStatus",
+      `📋 Folder copied: ${handle.name}`,
+      "success"
+    );
+
+  } catch (error) {
+
+    if (error.name === "AbortError") return;
+
+    setStatus(
+      "copyStatus",
+      error.message,
+      "error"
+    );
+  }
+}
+
+
+/* ==========================================================
+   PASTE
+========================================================== */
+
+async function pasteItem() {
+
+  if (!copiedItem) {
+
+    setStatus(
+      "pasteStatus",
+      "Nothing has been copied yet.",
+      "error"
+    );
+
+    return;
+  }
+
+  try {
+
+    const destination =
+      await window.showDirectoryPicker({
+        mode: "readwrite"
+      });
+
+
+    if (
+      copiedItem.type === "file"
+    ) {
+
+      await pasteFile(
+        copiedItem.handle,
+        destination
+      );
+
+    } else {
+
+      await pasteDirectory(
+        copiedItem.handle,
+        destination
+      );
+
+    }
+
+  } catch (error) {
+
+    if (error.name === "AbortError") {
+
+      setStatus(
+        "pasteStatus",
+        "Paste cancelled."
+      );
+
+      return;
+    }
+
+    console.error(error);
+
+    setStatus(
+      "pasteStatus",
+      error.message,
+      "error"
+    );
+  }
+}
+
+
+/* ==========================================================
+   PASTE FILE
+========================================================== */
+
+async function pasteFile(
+  sourceHandle,
+  destination
+) {
+
+  const file =
+    await sourceHandle.getFile();
+
+
+  const outputHandle =
+    await destination.getFileHandle(
+      file.name,
+      {
+        create: true
+      }
+    );
+
+
+  const writable =
+    await outputHandle.createWritable();
+
+
+  const reader =
+    file.stream().getReader();
+
+
+  let copied = 0;
+
+  const total =
+    file.size;
+
+  const start =
+    performance.now();
+
+
+  while (true) {
+
+    const {
+      value,
+      done
+    } =
+      await reader.read();
+
+    if (done) break;
+
+    await writable.write(value);
+
+    copied +=
+      value.byteLength;
+
+
+    const percent =
+      copied / total * 100;
+
+    const elapsed =
+      (performance.now() - start) / 1000;
+
+    const speed =
+      elapsed > 0
+        ? copied / elapsed
+        : 0;
+
+    const remaining =
+      total - copied;
+
+    const eta =
+      speed > 0
+        ? remaining / speed
+        : 0;
+
+
+    setProgress(
+      "copyProgress",
+      "copyProgressText",
+      percent,
+
+      `${percent.toFixed(1)}% — ` +
+      `${formatBytes(copied)} / ${formatBytes(total)} — ` +
+      `Remaining: ${formatBytes(remaining)} — ` +
+      `Speed: ${formatBytes(speed)}/s — ` +
+      `ETA: ${formatTime(eta)}`
+    );
+  }
+
+
+  await writable.close();
+
+
+  setStatus(
+    "pasteStatus",
+    `✅ Pasted ${file.name} directly to the selected folder.`,
+    "success"
+  );
+}
+
+
+/* ==========================================================
+   PASTE FOLDER
+========================================================== */
+
+async function pasteDirectory(
+  sourceDirectory,
+  destination
+) {
+
+  const target =
+    await destination.getDirectoryHandle(
+      sourceDirectory.name,
+      {
+        create: true
+      }
+    );
+
+
+  setStatus(
+    "pasteStatus",
+    `Copying folder ${sourceDirectory.name}...`
+  );
+
+
+  await copyDirectoryContents(
+    sourceDirectory,
+    target
+  );
+
+
+  setStatus(
+    "pasteStatus",
+    `✅ Folder ${sourceDirectory.name} pasted successfully.`,
+    "success"
+  );
+}
+
+
+async function copyDirectoryContents(
+  source,
+  destination
+) {
+
+  for await (
+    const [name, handle]
+    of source.entries()
+  ) {
+
+    if (
+      handle.kind === "file"
+    ) {
+
+      const file =
+        await handle.getFile();
+
+      const output =
+        await destination.getFileHandle(
+          name,
+          {
+            create: true
+          }
+        );
+
+      const writable =
+        await output.createWritable();
+
+      const reader =
+        file.stream().getReader();
+
+
+      while (true) {
+
+        const {
+          value,
+          done
+        } =
+          await reader.read();
+
+        if (done) break;
+
+        await writable.write(value);
+      }
+
+
+      await writable.close();
+
+    } else {
+
+      const subfolder =
+        await destination.getDirectoryHandle(
+          name,
+          {
+            create: true
+          }
+        );
+
+      await copyDirectoryContents(
+        handle,
+        subfolder
+      );
+    }
+  }
+}
+
+
+/* ==========================================================
+   TIME
+========================================================== */
+
+function formatTime(seconds) {
+
+  if (
+    !Number.isFinite(seconds) ||
+    seconds <= 0
+  ) {
+    return "Calculating...";
+  }
+
+  seconds =
+    Math.round(seconds);
+
+  const hours =
+    Math.floor(
+      seconds / 3600
+    );
+
+  seconds %= 3600;
+
+  const minutes =
+    Math.floor(
+      seconds / 60
+    );
+
+  seconds %= 60;
+
+
+  if (hours > 0) {
+
+    return (
+      `${hours}h ` +
+      `${minutes}m ` +
+      `${seconds}s`
+    );
+  }
+
+  if (minutes > 0) {
+
+    return (
+      `${minutes}m ` +
+      `${seconds}s`
+    );
+  }
+
+  return `${seconds}s`;
+}
+
+
+/* ==========================================================
+   HTML ESCAPE
+========================================================== */
+
+function escapeHtml(text) {
+
+  return String(text)
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#039;");
+}
+
 </script>
 
 </body>
