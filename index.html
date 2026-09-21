@@ -1,434 +1,430 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Maria Drive Splitter</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Maria Drive Splitter</title>
 
-  <style>
-    * {
-      box-sizing: border-box;
-    }
+<style>
+*{box-sizing:border-box}
 
-    body {
-      margin: 0;
-      padding: 20px;
-      font-family: Arial, sans-serif;
-      background: #f5f7fb;
-      color: #222;
-    }
+body{
+  margin:0;
+  padding:20px;
+  font-family:Arial,sans-serif;
+  background:#f5f7fb;
+  color:#222
+}
 
-    .container {
-      max-width: 950px;
-      margin: auto;
-    }
+.container{
+  max-width:1000px;
+  margin:auto
+}
 
-    h1 {
-      text-align: center;
-      margin-bottom: 8px;
-    }
+h1{text-align:center;margin-bottom:6px}
+.subtitle{text-align:center;color:#666;margin-bottom:22px}
 
-    .subtitle {
-      text-align: center;
-      color: #666;
-      margin-bottom: 25px;
-    }
+.card{
+  background:#fff;
+  border-radius:16px;
+  padding:22px;
+  margin-bottom:20px;
+  box-shadow:0 4px 18px rgba(0,0,0,.08)
+}
 
-    .card {
-      background: white;
-      border-radius: 16px;
-      padding: 22px;
-      margin-bottom: 20px;
-      box-shadow: 0 4px 18px rgba(0,0,0,.08);
-    }
+h2{margin-top:0}
 
-    h2 {
-      margin-top: 0;
-    }
+button{
+  border:0;
+  border-radius:10px;
+  padding:11px 16px;
+  cursor:pointer;
+  font-size:15px;
+  background:#2563eb;
+  color:white;
+  margin:5px 3px
+}
 
-    button {
-      border: 0;
-      border-radius: 10px;
-      padding: 11px 16px;
-      cursor: pointer;
-      font-size: 15px;
-      background: #2563eb;
-      color: white;
-      margin: 5px 3px;
-    }
+button:hover{opacity:.9}
+button:disabled{opacity:.5;cursor:not-allowed}
 
-    button:hover {
-      opacity: .9;
-    }
+.green{background:#16a34a}
+.orange{background:#ea580c}
+.gray{background:#64748b}
+.red{background:#dc2626}
 
-    button:disabled {
-      opacity: .5;
-      cursor: not-allowed;
-    }
+input,select{
+  padding:10px;
+  border:1px solid #ccc;
+  border-radius:8px;
+  font-size:15px
+}
 
-    .green {
-      background: #16a34a;
-    }
+.row{
+  display:flex;
+  gap:8px;
+  align-items:center;
+  flex-wrap:wrap
+}
 
-    .orange {
-      background: #ea580c;
-    }
+.info,.status{
+  background:#f1f5f9;
+  padding:12px;
+  border-radius:10px;
+  margin:12px 0;
+  word-break:break-word
+}
 
-    .gray {
-      background: #64748b;
-    }
+.success{
+  background:#dcfce7;
+  color:#166534
+}
 
-    .red {
-      background: #dc2626;
-    }
+.error{
+  background:#fee2e2;
+  color:#991b1b
+}
 
-    input,
-    select {
-      padding: 10px;
-      border: 1px solid #ccc;
-      border-radius: 8px;
-      font-size: 15px;
-    }
+.progress{
+  height:12px;
+  background:#e5e7eb;
+  border-radius:20px;
+  overflow:hidden;
+  margin:10px 0
+}
 
-    .row {
-      display: flex;
-      gap: 8px;
-      align-items: center;
-      flex-wrap: wrap;
-    }
+.progress-bar{
+  height:100%;
+  width:0%;
+  background:#2563eb;
+  transition:width .15s
+}
 
-    .info {
-      background: #f1f5f9;
-      padding: 12px;
-      border-radius: 10px;
-      margin: 12px 0;
-      word-break: break-word;
-    }
+.progress-text{
+  font-weight:bold;
+  margin-top:8px;
+  word-break:break-word
+}
 
-    .status {
-      background: #eef2ff;
-      padding: 12px;
-      border-radius: 10px;
-      margin-top: 12px;
-      word-break: break-word;
-    }
+.part,.merge-row,.drive-row{
+  border:1px solid #ddd;
+  border-radius:10px;
+  padding:12px;
+  margin-top:9px;
+  background:#fafafa
+}
 
-    .success {
-      background: #dcfce7;
-      color: #166534;
-    }
+.merge-row{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  flex-wrap:wrap
+}
 
-    .error {
-      background: #fee2e2;
-      color: #991b1b;
-    }
+.merge-name{
+  flex:1;
+  word-break:break-all
+}
 
-    .progress {
-      height: 12px;
-      background: #e5e7eb;
-      border-radius: 20px;
-      overflow: hidden;
-      margin: 10px 0;
-    }
+.move{
+  background:#475569;
+  padding:7px 11px;
+  margin:0
+}
 
-    .progress-bar {
-      height: 100%;
-      width: 0%;
-      background: #2563eb;
-      transition: width .15s;
-    }
+.drive-row{
+  display:flex;
+  align-items:center;
+  gap:10px
+}
 
-    .part {
-      border: 1px solid #ddd;
-      border-radius: 10px;
-      padding: 12px;
-      margin-top: 10px;
-      background: #fafafa;
-    }
+.drive-icon{
+  font-size:24px;
+  width:34px
+}
 
-    .part-name {
-      font-weight: bold;
-      word-break: break-all;
-    }
+.drive-name{
+  flex:1;
+  word-break:break-word
+}
 
-    .merge-row {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      border: 1px solid #ddd;
-      border-radius: 10px;
-      padding: 10px;
-      margin-top: 8px;
-      background: #fafafa;
-    }
+.drive-meta{
+  color:#64748b;
+  font-size:12px
+}
 
-    .merge-name {
-      flex: 1;
-      word-break: break-all;
-    }
+.hidden{display:none}
 
-    .move {
-      background: #475569;
-      padding: 7px 11px;
-      margin: 0;
-    }
+.small{
+  font-size:13px;
+  color:#64748b
+}
 
-    .hidden {
-      display: none;
-    }
+#driveFiles{
+  max-height:500px;
+  overflow:auto;
+  margin-top:10px
+}
 
-    .big-progress {
-      margin-top: 15px;
-    }
-
-    .progress-text {
-      font-weight: bold;
-      margin-top: 8px;
-    }
-
-    .copy-box {
-      border: 2px dashed #cbd5e1;
-      border-radius: 12px;
-      padding: 15px;
-      margin-top: 12px;
-    }
-
-    @media(max-width:600px) {
-      body {
-        padding: 10px;
-      }
-
-      .card {
-        padding: 16px;
-      }
-
-      .merge-row {
-        flex-wrap: wrap;
-      }
-
-      .merge-name {
-        min-width: 100%;
-      }
-    }
-  </style>
+@media(max-width:600px){
+  body{padding:10px}
+  .card{padding:16px}
+  .drive-row{align-items:flex-start}
+}
+</style>
 </head>
 
 <body>
 
 <div class="container">
 
-  <h1>Maria Drive Splitter</h1>
-
-  <div class="subtitle">
-    Split • Merge • Copy • Paste
-  </div>
-
-
-  <!-- =====================================================
-       SPLIT
-  ====================================================== -->
-
-  <div class="card">
-
-    <h2>✂️ Split</h2>
-
-    <button onclick="selectSplitFile()">
-      📁 Select File
-    </button>
-
-    <div id="splitFileInfo" class="info">
-      No file selected.
-    </div>
-
-    <div class="row">
-
-      <input
-        id="splitSize"
-        type="number"
-        min="1"
-        step="any"
-        placeholder="Part size"
-      >
-
-      <select id="splitUnit">
-        <option value="byte">Byte</option>
-        <option value="KB">KB</option>
-        <option value="MB" selected>MB</option>
-        <option value="GB">GB</option>
-        <option value="TB">TB</option>
-      </select>
-
-    </div>
-
-    <button
-      class="green"
-      onclick="splitAndPaste()"
-    >
-      ✂️ Split & Paste
-    </button>
-
-    <div id="splitStatus" class="status">
-      Select a file to begin.
-    </div>
-
-    <div class="progress">
-      <div
-        id="splitProgress"
-        class="progress-bar"
-      ></div>
-    </div>
-
-    <div id="splitProgressText"
-         class="progress-text"></div>
-
-    <div id="partsList"></div>
-
-  </div>
+<h1>Maria Drive Splitter</h1>
+<div class="subtitle">
+Split • Merge • Copy • Paste • Google Drive
+</div>
 
 
-  <!-- =====================================================
-       MERGE
-  ====================================================== -->
+<!-- ======================================================
+     SPLIT
+====================================================== -->
 
-  <div class="card">
+<div class="card">
 
-    <h2>🔗 Merge</h2>
+<h2>✂️ Split</h2>
 
-    <button onclick="selectMergeFiles()">
-      📁 Select Parts
-    </button>
+<button onclick="selectSplitFile()">
+📁 Select File
+</button>
 
-    <div class="info">
-      Select the parts from your device, then use ↑ ↓ to put
-      them in the correct order.
-    </div>
+<div id="splitFileInfo" class="info">
+No file selected.
+</div>
 
-    <div id="mergeList"></div>
+<div class="row">
 
-    <button
-      class="green"
-      onclick="mergeAndPaste()"
-    >
-      🔗 Merge & Paste
-    </button>
+<input
+ id="splitSize"
+ type="number"
+ min="1"
+ step="any"
+ placeholder="Part size">
 
-    <div id="mergeStatus" class="status">
-      No parts selected.
-    </div>
+<select id="splitUnit">
+<option value="byte">Byte</option>
+<option value="KB">KB</option>
+<option value="MB" selected>MB</option>
+<option value="GB">GB</option>
+<option value="TB">TB</option>
+</select>
 
-    <div class="progress">
-      <div
-        id="mergeProgress"
-        class="progress-bar"
-      ></div>
-    </div>
+</div>
 
-    <div id="mergeProgressText"
-         class="progress-text"></div>
+<button class="green" onclick="splitAndPaste()">
+✂️ Split & Paste
+</button>
 
-  </div>
+<div id="splitStatus" class="status">
+Select a file to begin.
+</div>
 
+<div class="progress">
+<div id="splitProgress" class="progress-bar"></div>
+</div>
 
-  <!-- =====================================================
-       COPY
-  ====================================================== -->
+<div id="splitProgressText" class="progress-text"></div>
 
-  <div class="card">
-
-    <h2>📋 Copy</h2>
-
-    <p>
-      Choose a file or folder. The website will remember it
-      as the item to paste.
-    </p>
-
-    <button onclick="copyFile()">
-      📋 Copy File
-    </button>
-
-    <button
-      class="orange"
-      onclick="copyFolder()"
-    >
-      📋 Copy Folder
-    </button>
-
-    <div
-      id="copyStatus"
-      class="status"
-    >
-      Nothing copied.
-    </div>
-
-  </div>
-
-
-  <!-- =====================================================
-       PASTE
-  ====================================================== -->
-
-  <div class="card">
-
-    <h2>📌 Paste</h2>
-
-    <p>
-      Choose the destination folder, then paste the item
-      you copied.
-    </p>
-
-    <button
-      class="green"
-      onclick="pasteItem()"
-    >
-      📌 Paste
-    </button>
-
-    <div
-      id="pasteStatus"
-      class="status"
-    >
-      Nothing to paste.
-    </div>
-
-    <div class="progress">
-      <div
-        id="copyProgress"
-        class="progress-bar"
-      ></div>
-    </div>
-
-    <div
-      id="copyProgressText"
-      class="progress-text"
-    ></div>
-
-  </div>
+<div id="partsList"></div>
 
 </div>
 
 
+<!-- ======================================================
+     MERGE
+====================================================== -->
+
+<div class="card">
+
+<h2>🔗 Merge</h2>
+
+<button onclick="selectMergeFiles()">
+📁 Select Parts
+</button>
+
+<div class="info">
+Select the parts and use ↑ ↓ to put them in the correct order.
+</div>
+
+<div id="mergeList"></div>
+
+<button class="green" onclick="mergeAndPaste()">
+🔗 Merge & Paste
+</button>
+
+<div id="mergeStatus" class="status">
+No parts selected.
+</div>
+
+<div class="progress">
+<div id="mergeProgress" class="progress-bar"></div>
+</div>
+
+<div id="mergeProgressText" class="progress-text"></div>
+
+</div>
+
+
+<!-- ======================================================
+     LOCAL COPY
+====================================================== -->
+
+<div class="card">
+
+<h2>📋 Copy from Device</h2>
+
+<button onclick="copyFile()">
+📋 Copy File
+</button>
+
+<button class="orange" onclick="copyFolder()">
+📋 Copy Folder
+</button>
+
+<div id="copyStatus" class="status">
+Nothing copied.
+</div>
+
+</div>
+
+
+<!-- ======================================================
+     LOCAL PASTE
+====================================================== -->
+
+<div class="card">
+
+<h2>📌 Paste</h2>
+
+<p>
+Choose the destination folder and paste the item you copied.
+</p>
+
+<button class="green" onclick="pasteItem()">
+📌 Paste
+</button>
+
+<div id="pasteStatus" class="status">
+Nothing to paste.
+</div>
+
+<div class="progress">
+<div id="copyProgress" class="progress-bar"></div>
+</div>
+
+<div id="copyProgressText" class="progress-text"></div>
+
+</div>
+
+
+<!-- ======================================================
+     GOOGLE DRIVE
+====================================================== -->
+
+<div class="card">
+
+<h2>☁️ Google Drive</h2>
+
+<button id="googleLoginBtn" onclick="googleLogin()">
+🔐 Connect Google Drive
+</button>
+
+<button
+ id="googleLogoutBtn"
+ class="red hidden"
+ onclick="googleLogout()">
+Logout
+</button>
+
+<div id="driveStatus" class="status">
+Not connected.
+</div>
+
+<div class="row">
+
+<button
+ id="refreshDriveBtn"
+ class="gray hidden"
+ onclick="loadDriveFiles()">
+🔄 Refresh Files
+</button>
+
+</div>
+
+<div id="driveFiles"></div>
+
+<div class="info small">
+Google Drive files are shown here. You can copy a Drive file and paste
+it directly into a folder on your device.
+</div>
+
+<div class="progress">
+<div id="driveProgress" class="progress-bar"></div>
+</div>
+
+<div id="driveProgressText" class="progress-text"></div>
+
+</div>
+
+
+</div>
+
+
+<script src="https://accounts.google.com/gsi/client"></script>
+
 <script>
 
-/* ==========================================================
-   GLOBAL STATE
-========================================================== */
+/* ======================================================
+   GOOGLE SETTINGS
+====================================================== */
+
+const GOOGLE_CLIENT_ID =
+"304831987723-5g9mvugqaoi8uhg6vofrjqqm77u48onh.apps.googleusercontent.com";
+
+const GOOGLE_SCOPE =
+"https://www.googleapis.com/auth/drive.readonly";
+
+let googleToken = null;
+let googleTokenClient = null;
+
+let driveFiles = [];
+
+let copiedItem = null;
 
 let splitFileHandle = null;
 
 let mergeFiles = [];
 
-let copiedItem = null;
+
+/* ======================================================
+   HELPERS
+====================================================== */
+
+function escapeHtml(value){
+
+  return String(value)
+    .replaceAll("&","&amp;")
+    .replaceAll("<","&lt;")
+    .replaceAll(">","&gt;")
+    .replaceAll('"',"&quot;")
+    .replaceAll("'","&#039;");
+}
 
 
-/* ==========================================================
-   BASIC HELPERS
-========================================================== */
+function formatBytes(bytes){
 
-function formatBytes(bytes) {
+  if(!bytes || bytes < 1)
+    return "0 Bytes";
 
-  if (!bytes) return "0 Bytes";
-
-  const units = [
+  const units=[
     "Bytes",
     "KB",
     "MB",
@@ -436,96 +432,90 @@ function formatBytes(bytes) {
     "TB"
   ];
 
-  const i =
-    Math.floor(
-      Math.log(bytes) / Math.log(1024)
-    );
+  const i=Math.floor(
+    Math.log(bytes)/Math.log(1024)
+  );
 
   return (
-    bytes / Math.pow(1024, i)
-  ).toFixed(2) +
-  " " +
-  units[i];
+    bytes/Math.pow(1024,i)
+  ).toFixed(2)+" "+units[i];
 }
 
 
-function sleep(ms) {
+function formatTime(seconds){
 
-  return new Promise(
-    resolve => setTimeout(resolve, ms)
-  );
+  if(!Number.isFinite(seconds) || seconds <= 0)
+    return "0s";
+
+  seconds=Math.round(seconds);
+
+  const h=Math.floor(seconds/3600);
+  const m=Math.floor((seconds%3600)/60);
+  const s=seconds%60;
+
+  if(h)
+    return `${h}h ${m}m ${s}s`;
+
+  if(m)
+    return `${m}m ${s}s`;
+
+  return `${s}s`;
 }
 
 
-function setStatus(
-  id,
-  text,
-  type = ""
-) {
+function setStatus(id,text,type=""){
 
-  const el =
-    document.getElementById(id);
+  const el=document.getElementById(id);
 
-  el.textContent = text;
+  el.textContent=text;
 
-  el.className =
-    "status " + type;
+  el.className="status "+type;
 }
 
 
-function setProgress(
-  barId,
-  textId,
-  percent,
-  text
-) {
+function setProgress(barId,textId,percent,text){
 
   document.getElementById(barId)
-    .style.width =
-    Math.max(
-      0,
-      Math.min(100, percent)
-    ) + "%";
+    .style.width=
+    Math.max(0,Math.min(100,percent))+"%";
 
   document.getElementById(textId)
-    .textContent =
-    text;
+    .textContent=text;
 }
 
 
-/* ==========================================================
-   SPLIT — SELECT FILE
-========================================================== */
+/* ======================================================
+   SPLIT
+====================================================== */
 
-async function selectSplitFile() {
+async function selectSplitFile(){
 
-  if (!window.showOpenFilePicker) {
+  if(!window.showOpenFilePicker){
 
     setStatus(
       "splitStatus",
-      "Your browser does not support File System Access API. Use Chrome or Edge on desktop.",
+      "Use Chrome or Edge on desktop.",
       "error"
     );
 
     return;
   }
 
-  try {
+  try{
 
-    const handles =
+    const handles=
       await window.showOpenFilePicker({
-        multiple: false
+        multiple:false
       });
 
-    splitFileHandle =
-      handles[0];
+    splitFileHandle=handles[0];
 
-    const file =
+    const file=
       await splitFileHandle.getFile();
 
     document.getElementById(
       "splitFileInfo"
-    ).innerHTML =
+    ).innerHTML=
       `<strong>${escapeHtml(file.name)}</strong><br>
        ${formatBytes(file.size)}`;
 
@@ -534,9 +524,10 @@ async function selectSplitFile() {
       "File selected. Choose the part size."
     );
 
-  } catch (error) {
+  }catch(error){
 
-    if (error.name === "AbortError") return;
+    if(error.name==="AbortError")
+      return;
 
     setStatus(
       "splitStatus",
@@ -547,58 +538,40 @@ async function selectSplitFile() {
 }
 
 
-/* ==========================================================
-   SPLIT SIZE
-========================================================== */
+function getSplitSize(){
 
-function getSplitSize() {
-
-  const value =
+  const value=
     Number(
       document.getElementById(
         "splitSize"
       ).value
     );
 
-  const unit =
+  const unit=
     document.getElementById(
       "splitUnit"
     ).value;
 
-  if (
-    !Number.isFinite(value) ||
-    value <= 0
-  ) {
+  if(!Number.isFinite(value)||value<=0)
     return null;
-  }
 
-  const multipliers = {
-
-    byte: 1,
-
-    KB: 1024,
-
-    MB: 1024 ** 2,
-
-    GB: 1024 ** 3,
-
-    TB: 1024 ** 4
-
+  const multipliers={
+    byte:1,
+    KB:1024,
+    MB:1024**2,
+    GB:1024**3,
+    TB:1024**4
   };
 
   return Math.floor(
-    value * multipliers[unit]
+    value*multipliers[unit]
   );
 }
 
 
-/* ==========================================================
-   SPLIT + PASTE
-========================================================== */
+async function splitAndPaste(){
 
-async function splitAndPaste() {
-
-  if (!splitFileHandle) {
+  if(!splitFileHandle){
 
     setStatus(
       "splitStatus",
@@ -609,10 +582,9 @@ async function splitAndPaste() {
     return;
   }
 
-  const partSize =
-    getSplitSize();
+  const partSize=getSplitSize();
 
-  if (!partSize) {
+  if(!partSize){
 
     setStatus(
       "splitStatus",
@@ -623,188 +595,137 @@ async function splitAndPaste() {
     return;
   }
 
-  try {
+  try{
 
-    /*
-      USER CHOOSES DESTINATION FOLDER
-    */
-
-    const destination =
+    const destination=
       await window.showDirectoryPicker({
-        mode: "readwrite"
+        mode:"readwrite"
       });
 
-    const file =
+    const file=
       await splitFileHandle.getFile();
 
-    const totalSize =
-      file.size;
+    const totalSize=file.size;
 
-    let offset = 0;
+    let offset=0;
+    let partNumber=1;
 
-    let partNumber = 1;
+    const createdParts=[];
 
-    const createdParts = [];
+    const startTime=performance.now();
 
-    const startTime =
-      performance.now();
+    while(offset<totalSize){
 
-    setStatus(
-      "splitStatus",
-      "Splitting and copying directly to the selected folder..."
-    );
-
-    while (offset < totalSize) {
-
-      const end =
+      const end=
         Math.min(
-          offset + partSize,
+          offset+partSize,
           totalSize
         );
 
-      const partName =
-        file.name +
-        ".part" +
-        String(partNumber).padStart(3, "0");
+      const partName=
+        file.name+
+        ".part"+
+        String(partNumber).padStart(3,"0");
 
-
-      /*
-        CREATE DESTINATION FILE
-      */
-
-      const outputHandle =
+      const outputHandle=
         await destination.getFileHandle(
           partName,
-          {
-            create: true
-          }
+          {create:true}
         );
 
-
-      const writable =
+      const writable=
         await outputHandle.createWritable();
 
+      const part=
+        file.slice(offset,end);
 
-      /*
-        READ ONLY THIS PART
-      */
-
-      const part =
-        file.slice(
-          offset,
-          end
-        );
-
-
-      const reader =
+      const reader=
         part.stream().getReader();
 
+      let partWritten=0;
 
-      while (true) {
+      while(true){
 
-        const {
-          value,
-          done
-        } =
+        const {value,done}=
           await reader.read();
 
-        if (done) break;
+        if(done)
+          break;
 
         await writable.write(value);
 
-        const written =
-          offset +
-          Math.min(
-            value.byteLength,
-            end - offset
-          );
+        partWritten+=value.byteLength;
 
-        const percent =
-          (written / totalSize) * 100;
+        const written=
+          offset+partWritten;
 
-        const elapsed =
-          (performance.now() - startTime) / 1000;
+        const percent=
+          written/totalSize*100;
 
-        const speed =
-          elapsed > 0
-            ? written / elapsed
-            : 0;
+        const elapsed=
+          (performance.now()-startTime)/1000;
 
-        const remaining =
-          totalSize - written;
+        const speed=
+          elapsed>0
+          ? written/elapsed
+          :0;
 
-        const eta =
-          speed > 0
-            ? remaining / speed
-            : 0;
+        const remaining=
+          totalSize-written;
+
+        const eta=
+          speed>0
+          ? remaining/speed
+          :0;
 
         setProgress(
           "splitProgress",
           "splitProgressText",
           percent,
-
-          `${percent.toFixed(1)}% — ` +
-          `${formatBytes(written)} / ${formatBytes(totalSize)} — ` +
-          `Remaining: ${formatBytes(remaining)} — ` +
-          `Speed: ${formatBytes(speed)}/s — ` +
+          `${percent.toFixed(1)}% — `+
+          `${formatBytes(written)} / ${formatBytes(totalSize)} — `+
+          `Remaining: ${formatBytes(remaining)} — `+
+          `Speed: ${formatBytes(speed)}/s — `+
           `ETA: ${formatTime(eta)}`
         );
       }
 
-
       await writable.close();
-
 
       createdParts.push(partName);
 
-      offset = end;
-
+      offset=end;
       partNumber++;
     }
-
 
     setProgress(
       "splitProgress",
       "splitProgressText",
       100,
-
       `100% — ${formatBytes(totalSize)} / ${formatBytes(totalSize)} — Done`
     );
 
-
     setStatus(
       "splitStatus",
-      `✅ Done. Created ${createdParts.length} parts directly in the selected folder.`,
+      `✅ Created ${createdParts.length} parts.`,
       "success"
     );
 
-
     document.getElementById(
       "partsList"
-    ).innerHTML =
-      createdParts
-        .map(
-          name =>
-            `<div class="part">
-              <div class="part-name">
-                ${escapeHtml(name)}
-              </div>
-              <div>✓ Created locally</div>
-            </div>`
-        )
-        .join("");
+    ).innerHTML=
+      createdParts.map(
+        name=>
+        `<div class="part">
+          <strong>${escapeHtml(name)}</strong><br>
+          ✓ Created locally
+        </div>`
+      ).join("");
 
-  } catch (error) {
+  }catch(error){
 
-    if (error.name === "AbortError") {
-
-      setStatus(
-        "splitStatus",
-        "Operation cancelled."
-      );
-
+    if(error.name==="AbortError")
       return;
-    }
 
     console.error(error);
 
@@ -817,40 +738,29 @@ async function splitAndPaste() {
 }
 
 
-/* ==========================================================
-   MERGE — SELECT PARTS
-========================================================== */
+/* ======================================================
+   MERGE
+====================================================== */
 
-async function selectMergeFiles() {
+async function selectMergeFiles(){
 
-  if (!window.showOpenFilePicker) {
+  try{
 
-    setStatus(
-      "mergeStatus",
-      "Use Chrome or Edge on desktop.",
-      "error"
-    );
-
-    return;
-  }
-
-  try {
-
-    const handles =
+    const handles=
       await window.showOpenFilePicker({
-        multiple: true
+        multiple:true
       });
 
-    mergeFiles =
-      handles;
+    mergeFiles=handles;
 
     renderMergeFiles();
 
     validateMergeOrder();
 
-  } catch (error) {
+  }catch(error){
 
-    if (error.name === "AbortError") return;
+    if(error.name==="AbortError")
+      return;
 
     setStatus(
       "mergeStatus",
@@ -861,54 +771,47 @@ async function selectMergeFiles() {
 }
 
 
-function parsePartName(name) {
+function parsePartName(name){
 
-  const match =
+  const match=
     name.match(
       /\.part(\d+)$/i
     );
 
-  if (!match) return null;
+  if(!match)
+    return null;
 
   return {
-
-    number:
-      Number(match[1]),
-
+    number:Number(match[1]),
     originalName:
       name.replace(
         /\.part\d+$/i,
         ""
       )
-
   };
 }
 
 
-function renderMergeFiles() {
+function renderMergeFiles(){
 
-  const container =
+  const container=
     document.getElementById(
       "mergeList"
     );
 
-  container.innerHTML = "";
+  container.innerHTML="";
 
   mergeFiles.forEach(
-    (handle, index) => {
+    (handle,index)=>{
 
-      const row =
-        document.createElement(
-          "div"
-        );
+      const row=
+        document.createElement("div");
 
-      row.className =
-        "merge-row";
+      row.className="merge-row";
 
-      row.innerHTML = `
-
+      row.innerHTML=`
         <strong>
-          ${String(index + 1).padStart(3,"0")}
+          ${String(index+1).padStart(3,"0")}
         </strong>
 
         <div class="merge-name">
@@ -918,19 +821,16 @@ function renderMergeFiles() {
         <button
           class="move"
           onclick="moveMerge(${index},-1)"
-          ${index === 0 ? "disabled" : ""}
-        >
+          ${index===0?"disabled":""}>
           ↑
         </button>
 
         <button
           class="move"
           onclick="moveMerge(${index},1)"
-          ${index === mergeFiles.length - 1 ? "disabled" : ""}
-        >
+          ${index===mergeFiles.length-1?"disabled":""}>
           ↓
         </button>
-
       `;
 
       container.appendChild(row);
@@ -939,26 +839,23 @@ function renderMergeFiles() {
 }
 
 
-function moveMerge(index, direction) {
+function moveMerge(index,direction){
 
-  const newIndex =
-    index + direction;
+  const newIndex=index+direction;
 
-  if (
-    newIndex < 0 ||
-    newIndex >= mergeFiles.length
-  ) {
+  if(
+    newIndex<0 ||
+    newIndex>=mergeFiles.length
+  )
     return;
-  }
 
-  const temp =
-    mergeFiles[index];
-
-  mergeFiles[index] =
-    mergeFiles[newIndex];
-
-  mergeFiles[newIndex] =
-    temp;
+  [
+    mergeFiles[index],
+    mergeFiles[newIndex]
+  ]=[
+    mergeFiles[newIndex],
+    mergeFiles[index]
+  ];
 
   renderMergeFiles();
 
@@ -966,9 +863,9 @@ function moveMerge(index, direction) {
 }
 
 
-async function validateMergeOrder() {
+function validateMergeOrder(){
 
-  if (!mergeFiles.length) {
+  if(!mergeFiles.length){
 
     setStatus(
       "mergeStatus",
@@ -978,40 +875,29 @@ async function validateMergeOrder() {
     return false;
   }
 
-  const parsed =
+  const parsed=
     mergeFiles.map(
-      handle =>
-        parsePartName(handle.name)
+      h=>parsePartName(h.name)
     );
 
-  if (
-    parsed.some(
-      item => !item
-    )
-  ) {
+  if(parsed.some(x=>!x)){
 
     setStatus(
       "mergeStatus",
-      "Every file must end with .part001, .part002, etc.",
+      "Files must end with .part001, .part002, etc.",
       "error"
     );
 
     return false;
   }
 
-  for (
-    let i = 0;
-    i < parsed.length;
-    i++
-  ) {
+  for(let i=0;i<parsed.length;i++){
 
-    if (
-      parsed[i].number !== i + 1
-    ) {
+    if(parsed[i].number!==i+1){
 
       setStatus(
         "mergeStatus",
-        `Wrong order at position ${i + 1}. Use ↑ and ↓.`,
+        `Wrong order at position ${i+1}. Use ↑ and ↓.`,
         "error"
       );
 
@@ -1029,165 +915,120 @@ async function validateMergeOrder() {
 }
 
 
-/* ==========================================================
-   MERGE + PASTE
-========================================================== */
+async function mergeAndPaste(){
 
-async function mergeAndPaste() {
-
-  if (
-    !(await validateMergeOrder())
-  ) {
+  if(!validateMergeOrder())
     return;
-  }
 
-  try {
+  try{
 
-    const destination =
+    const destination=
       await window.showDirectoryPicker({
-        mode: "readwrite"
+        mode:"readwrite"
       });
 
-    const first =
+    const first=
       await mergeFiles[0].getFile();
 
-    const originalName =
-      parsePartName(
-        first.name
-      ).originalName;
+    const originalName=
+      parsePartName(first.name)
+      .originalName;
 
+    const files=[];
 
-    const outputHandle =
-      await destination.getFileHandle(
-        originalName,
-        {
-          create: true
-        }
-      );
+    let totalSize=0;
 
+    for(const handle of mergeFiles){
 
-    const writable =
-      await outputHandle.createWritable();
-
-
-    let totalSize = 0;
-
-    const fileObjects = [];
-
-    for (
-      const handle of mergeFiles
-    ) {
-
-      const file =
+      const file=
         await handle.getFile();
 
-      fileObjects.push(file);
+      files.push(file);
 
-      totalSize += file.size;
+      totalSize+=file.size;
     }
 
+    const outputHandle=
+      await destination.getFileHandle(
+        originalName,
+        {create:true}
+      );
 
-    let writtenTotal = 0;
+    const writable=
+      await outputHandle.createWritable();
 
-    const startTime =
-      performance.now();
+    let written=0;
 
+    const startTime=performance.now();
 
-    for (
-      let i = 0;
-      i < fileObjects.length;
-      i++
-    ) {
+    for(const file of files){
 
-      const file =
-        fileObjects[i];
-
-      const reader =
+      const reader=
         file.stream().getReader();
 
+      while(true){
 
-      while (true) {
-
-        const {
-          value,
-          done
-        } =
+        const {value,done}=
           await reader.read();
 
-        if (done) break;
+        if(done)
+          break;
 
         await writable.write(value);
 
-        writtenTotal +=
-          value.byteLength;
+        written+=value.byteLength;
 
+        const percent=
+          written/totalSize*100;
 
-        const percent =
-          (writtenTotal / totalSize) * 100;
+        const elapsed=
+          (performance.now()-startTime)/1000;
 
-        const elapsed =
-          (performance.now() - startTime) / 1000;
+        const speed=
+          elapsed>0
+          ? written/elapsed
+          :0;
 
-        const speed =
-          elapsed > 0
-            ? writtenTotal / elapsed
-            : 0;
+        const remaining=
+          totalSize-written;
 
-        const remaining =
-          totalSize - writtenTotal;
-
-        const eta =
-          speed > 0
-            ? remaining / speed
-            : 0;
-
+        const eta=
+          speed>0
+          ? remaining/speed
+          :0;
 
         setProgress(
           "mergeProgress",
           "mergeProgressText",
           percent,
-
-          `${percent.toFixed(1)}% — ` +
-          `${formatBytes(writtenTotal)} / ${formatBytes(totalSize)} — ` +
-          `Remaining: ${formatBytes(remaining)} — ` +
-          `Speed: ${formatBytes(speed)}/s — ` +
+          `${percent.toFixed(1)}% — `+
+          `${formatBytes(written)} / ${formatBytes(totalSize)} — `+
+          `Remaining: ${formatBytes(remaining)} — `+
+          `Speed: ${formatBytes(speed)}/s — `+
           `ETA: ${formatTime(eta)}`
         );
       }
     }
 
-
     await writable.close();
-
 
     setProgress(
       "mergeProgress",
       "mergeProgressText",
       100,
-
-      `100% — ${formatBytes(totalSize)} / ${formatBytes(totalSize)} — Done`
+      "100% — Done"
     );
-
 
     setStatus(
       "mergeStatus",
-      `✅ ${originalName} created directly in the selected folder.`,
+      `✅ Merged into ${originalName}`,
       "success"
     );
 
-  } catch (error) {
+  }catch(error){
 
-    if (error.name === "AbortError") {
-
-      setStatus(
-        "mergeStatus",
-        "Operation cancelled."
-      );
-
+    if(error.name==="AbortError")
       return;
-    }
-
-    console.error(error);
 
     setStatus(
       "mergeStatus",
@@ -1198,37 +1039,40 @@ async function mergeAndPaste() {
 }
 
 
-/* ==========================================================
-   COPY
-========================================================== */
+/* ======================================================
+   LOCAL COPY
+====================================================== */
 
-async function copyFile() {
+async function copyFile(){
 
-  try {
+  try{
 
-    const handles =
+    const handles=
       await window.showOpenFilePicker({
-        multiple: false
+        multiple:false
       });
 
-    copiedItem = {
-
-      type: "file",
-
-      handle: handles[0]
-
+    copiedItem={
+      type:"local-file",
+      handle:handles[0]
     };
-
 
     setStatus(
       "copyStatus",
-      `📋 File copied: ${handles[0].name}`,
+      `📋 Copied: ${handles[0].name}`,
       "success"
     );
 
-  } catch (error) {
+    setStatus(
+      "pasteStatus",
+      `Ready to paste: ${handles[0].name}`,
+      "success"
+    );
 
-    if (error.name === "AbortError") return;
+  }catch(error){
+
+    if(error.name==="AbortError")
+      return;
 
     setStatus(
       "copyStatus",
@@ -1239,31 +1083,34 @@ async function copyFile() {
 }
 
 
-async function copyFolder() {
+async function copyFolder(){
 
-  try {
+  try{
 
-    const handle =
+    const handle=
       await window.showDirectoryPicker();
 
-    copiedItem = {
-
-      type: "directory",
-
+    copiedItem={
+      type:"local-folder",
       handle
-
     };
-
 
     setStatus(
       "copyStatus",
-      `📋 Folder copied: ${handle.name}`,
+      `📋 Copied folder: ${handle.name}`,
       "success"
     );
 
-  } catch (error) {
+    setStatus(
+      "pasteStatus",
+      `Ready to paste folder: ${handle.name}`,
+      "success"
+    );
 
-    if (error.name === "AbortError") return;
+  }catch(error){
+
+    if(error.name==="AbortError")
+      return;
 
     setStatus(
       "copyStatus",
@@ -1274,13 +1121,13 @@ async function copyFolder() {
 }
 
 
-/* ==========================================================
-   PASTE
-========================================================== */
+/* ======================================================
+   LOCAL PASTE
+====================================================== */
 
-async function pasteItem() {
+async function pasteItem(){
 
-  if (!copiedItem) {
+  if(!copiedItem){
 
     setStatus(
       "pasteStatus",
@@ -1291,43 +1138,43 @@ async function pasteItem() {
     return;
   }
 
-  try {
+  try{
 
-    const destination =
+    const destination=
       await window.showDirectoryPicker({
-        mode: "readwrite"
+        mode:"readwrite"
       });
 
+    if(copiedItem.type==="local-file"){
 
-    if (
-      copiedItem.type === "file"
-    ) {
-
-      await pasteFile(
+      await copyLocalFile(
         copiedItem.handle,
         destination
       );
 
-    } else {
+    }else if(
+      copiedItem.type==="local-folder"
+    ){
 
-      await pasteDirectory(
+      await copyLocalFolder(
         copiedItem.handle,
         destination
       );
 
+    }else if(
+      copiedItem.type==="drive-file"
+    ){
+
+      await copyDriveFileToLocal(
+        copiedItem.file,
+        destination
+      );
     }
 
-  } catch (error) {
+  }catch(error){
 
-    if (error.name === "AbortError") {
-
-      setStatus(
-        "pasteStatus",
-        "Paste cancelled."
-      );
-
+    if(error.name==="AbortError")
       return;
-    }
 
     console.error(error);
 
@@ -1340,276 +1187,801 @@ async function pasteItem() {
 }
 
 
-/* ==========================================================
-   PASTE FILE
-========================================================== */
-
-async function pasteFile(
+async function copyLocalFile(
   sourceHandle,
   destination
-) {
+){
 
-  const file =
+  const source=
     await sourceHandle.getFile();
 
-
-  const outputHandle =
+  const outputHandle=
     await destination.getFileHandle(
-      file.name,
-      {
-        create: true
-      }
+      source.name,
+      {create:true}
     );
 
-
-  const writable =
+  const writable=
     await outputHandle.createWritable();
 
+  const reader=
+    source.stream().getReader();
 
-  const reader =
-    file.stream().getReader();
+  let written=0;
 
+  const total=source.size;
 
-  let copied = 0;
+  const start=performance.now();
 
-  const total =
-    file.size;
+  while(true){
 
-  const start =
-    performance.now();
-
-
-  while (true) {
-
-    const {
-      value,
-      done
-    } =
+    const {value,done}=
       await reader.read();
 
-    if (done) break;
+    if(done)
+      break;
 
     await writable.write(value);
 
-    copied +=
-      value.byteLength;
+    written+=value.byteLength;
 
-
-    const percent =
-      copied / total * 100;
-
-    const elapsed =
-      (performance.now() - start) / 1000;
-
-    const speed =
-      elapsed > 0
-        ? copied / elapsed
-        : 0;
-
-    const remaining =
-      total - copied;
-
-    const eta =
-      speed > 0
-        ? remaining / speed
-        : 0;
-
-
-    setProgress(
-      "copyProgress",
-      "copyProgressText",
-      percent,
-
-      `${percent.toFixed(1)}% — ` +
-      `${formatBytes(copied)} / ${formatBytes(total)} — ` +
-      `Remaining: ${formatBytes(remaining)} — ` +
-      `Speed: ${formatBytes(speed)}/s — ` +
-      `ETA: ${formatTime(eta)}`
+    updateCopyProgress(
+      written,
+      total,
+      start
     );
   }
 
-
   await writable.close();
-
 
   setStatus(
     "pasteStatus",
-    `✅ Pasted ${file.name} directly to the selected folder.`,
+    `✅ Pasted ${source.name}`,
     "success"
   );
 }
 
 
-/* ==========================================================
-   PASTE FOLDER
-========================================================== */
-
-async function pasteDirectory(
-  sourceDirectory,
+async function copyLocalFolder(
+  sourceHandle,
   destination
-) {
+){
 
-  const target =
+  const target=
     await destination.getDirectoryHandle(
-      sourceDirectory.name,
-      {
-        create: true
-      }
+      sourceHandle.name,
+      {create:true}
     );
-
 
   setStatus(
     "pasteStatus",
-    `Copying folder ${sourceDirectory.name}...`
+    `Copying folder ${sourceHandle.name}...`
   );
 
-
-  await copyDirectoryContents(
-    sourceDirectory,
+  await copyDirectoryRecursive(
+    sourceHandle,
     target
   );
 
+  setProgress(
+    "copyProgress",
+    "copyProgressText",
+    100,
+    "100% — Folder copied"
+  );
 
   setStatus(
     "pasteStatus",
-    `✅ Folder ${sourceDirectory.name} pasted successfully.`,
+    `✅ Pasted folder ${sourceHandle.name}`,
     "success"
   );
 }
 
 
-async function copyDirectoryContents(
+async function copyDirectoryRecursive(
   source,
   destination
-) {
+){
 
-  for await (
-    const [name, handle]
+  for await(
+    const [name,handle]
     of source.entries()
-  ) {
+  ){
 
-    if (
-      handle.kind === "file"
-    ) {
+    if(handle.kind==="file"){
 
-      const file =
+      const file=
         await handle.getFile();
 
-      const output =
+      const output=
         await destination.getFileHandle(
           name,
-          {
-            create: true
-          }
+          {create:true}
         );
 
-      const writable =
+      const writable=
         await output.createWritable();
 
-      const reader =
+      const reader=
         file.stream().getReader();
 
+      while(true){
 
-      while (true) {
-
-        const {
-          value,
-          done
-        } =
+        const {value,done}=
           await reader.read();
 
-        if (done) break;
+        if(done)
+          break;
 
         await writable.write(value);
       }
 
-
       await writable.close();
 
-    } else {
+    }else if(
+      handle.kind==="directory"
+    ){
 
-      const subfolder =
+      const newDir=
         await destination.getDirectoryHandle(
           name,
-          {
-            create: true
-          }
+          {create:true}
         );
 
-      await copyDirectoryContents(
+      await copyDirectoryRecursive(
         handle,
-        subfolder
+        newDir
       );
     }
   }
 }
 
 
-/* ==========================================================
-   TIME
-========================================================== */
+function updateCopyProgress(
+  written,
+  total,
+  start
+){
 
-function formatTime(seconds) {
+  const percent=
+    total
+    ? written/total*100
+    :100;
 
-  if (
-    !Number.isFinite(seconds) ||
-    seconds <= 0
-  ) {
-    return "Calculating...";
-  }
+  const elapsed=
+    (performance.now()-start)/1000;
 
-  seconds =
-    Math.round(seconds);
+  const speed=
+    elapsed>0
+    ? written/elapsed
+    :0;
 
-  const hours =
-    Math.floor(
-      seconds / 3600
-    );
+  const remaining=
+    total-written;
 
-  seconds %= 3600;
+  const eta=
+    speed>0
+    ? remaining/speed
+    :0;
 
-  const minutes =
-    Math.floor(
-      seconds / 60
-    );
-
-  seconds %= 60;
-
-
-  if (hours > 0) {
-
-    return (
-      `${hours}h ` +
-      `${minutes}m ` +
-      `${seconds}s`
-    );
-  }
-
-  if (minutes > 0) {
-
-    return (
-      `${minutes}m ` +
-      `${seconds}s`
-    );
-  }
-
-  return `${seconds}s`;
+  setProgress(
+    "copyProgress",
+    "copyProgressText",
+    percent,
+    `${percent.toFixed(1)}% — `+
+    `${formatBytes(written)} / ${formatBytes(total)} — `+
+    `Remaining: ${formatBytes(remaining)} — `+
+    `Speed: ${formatBytes(speed)}/s — `+
+    `ETA: ${formatTime(eta)}`
+  );
 }
 
 
-/* ==========================================================
-   HTML ESCAPE
-========================================================== */
+/* ======================================================
+   GOOGLE LOGIN
+====================================================== */
 
-function escapeHtml(text) {
+function initGoogle(){
 
-  return String(text)
-    .replaceAll("&", "&amp;")
-    .replaceAll("<", "&lt;")
-    .replaceAll(">", "&gt;")
-    .replaceAll('"', "&quot;")
-    .replaceAll("'", "&#039;");
+  if(
+    !window.google ||
+    !google.accounts ||
+    !google.accounts.oauth2
+  ){
+
+    setStatus(
+      "driveStatus",
+      "Google authentication library did not load.",
+      "error"
+    );
+
+    return;
+  }
+
+  googleTokenClient=
+    google.accounts.oauth2.initTokenClient({
+
+      client_id:GOOGLE_CLIENT_ID,
+
+      scope:GOOGLE_SCOPE,
+
+      callback:(response)=>{
+
+        if(response.error){
+
+          console.error(response);
+
+          setStatus(
+            "driveStatus",
+            response.error_description ||
+            response.error,
+            "error"
+          );
+
+          return;
+        }
+
+        googleToken=
+          response.access_token;
+
+        document
+          .getElementById(
+            "googleLoginBtn"
+          )
+          .classList.add("hidden");
+
+        document
+          .getElementById(
+            "googleLogoutBtn"
+          )
+          .classList.remove("hidden");
+
+        document
+          .getElementById(
+            "refreshDriveBtn"
+          )
+          .classList.remove("hidden");
+
+        setStatus(
+          "driveStatus",
+          "✅ Google Drive connected.",
+          "success"
+        );
+
+        loadDriveFiles();
+      }
+    });
 }
+
+
+function googleLogin(){
+
+  if(!googleTokenClient)
+    initGoogle();
+
+  googleTokenClient.requestAccessToken({
+    prompt:"consent"
+  });
+}
+
+
+function googleLogout(){
+
+  if(googleToken){
+
+    google.accounts.oauth2.revoke(
+      googleToken,
+      ()=>{
+        googleToken=null;
+      }
+    );
+  }
+
+  document
+    .getElementById("googleLoginBtn")
+    .classList.remove("hidden");
+
+  document
+    .getElementById("googleLogoutBtn")
+    .classList.add("hidden");
+
+  document
+    .getElementById("refreshDriveBtn")
+    .classList.add("hidden");
+
+  document
+    .getElementById("driveFiles")
+    .innerHTML="";
+
+  setStatus(
+    "driveStatus",
+    "Disconnected."
+  );
+}
+
+
+/* ======================================================
+   GOOGLE DRIVE API
+====================================================== */
+
+async function driveRequest(
+  url,
+  options={}
+){
+
+  if(!googleToken)
+    throw new Error("Google Drive is not connected.");
+
+  const response=
+    await fetch(
+      url,
+      {
+        ...options,
+        headers:{
+          ...(options.headers||{}),
+          Authorization:
+            "Bearer "+googleToken
+        }
+      }
+    );
+
+  if(!response.ok){
+
+    const text=
+      await response.text();
+
+    throw new Error(
+      `Google Drive error ${response.status}: ${text}`
+    );
+  }
+
+  return response;
+}
+
+
+async function loadDriveFiles(){
+
+  if(!googleToken){
+
+    setStatus(
+      "driveStatus",
+      "Connect Google Drive first.",
+      "error"
+    );
+
+    return;
+  }
+
+  try{
+
+    setStatus(
+      "driveStatus",
+      "Loading all Google Drive files..."
+    );
+
+    driveFiles=[];
+
+    let pageToken="";
+
+    do{
+
+      const params=
+        new URLSearchParams();
+
+      params.set(
+        "q",
+        "trashed = false"
+      );
+
+      params.set(
+        "pageSize",
+        "1000"
+      );
+
+      params.set(
+        "fields",
+        "nextPageToken,files(id,name,mimeType,size,modifiedTime,parents,webViewLink)"
+      );
+
+      if(pageToken)
+        params.set(
+          "pageToken",
+          pageToken
+        );
+
+      const response=
+        await driveRequest(
+          "https://www.googleapis.com/drive/v3/files?"+
+          params.toString()
+        );
+
+      const data=
+        await response.json();
+
+      if(data.files)
+        driveFiles.push(...data.files);
+
+      pageToken=
+        data.nextPageToken || "";
+
+    }while(pageToken);
+
+    renderDriveFiles();
+
+    setStatus(
+      "driveStatus",
+      `✅ Found ${driveFiles.length} Drive files.`,
+      "success"
+    );
+
+  }catch(error){
+
+    console.error(error);
+
+    setStatus(
+      "driveStatus",
+      error.message,
+      "error"
+    );
+  }
+}
+
+
+/* ======================================================
+   DRIVE UI
+====================================================== */
+
+function driveIcon(file){
+
+  if(file.mimeType==="application/vnd.google-apps.folder")
+    return "📁";
+
+  if(file.mimeType.includes("document"))
+    return "📄";
+
+  if(file.mimeType.includes("spreadsheet"))
+    return "📊";
+
+  if(file.mimeType.includes("presentation"))
+    return "📽️";
+
+  if(file.mimeType.startsWith("video/"))
+    return "🎬";
+
+  if(file.mimeType.startsWith("audio/"))
+    return "🎵";
+
+  if(file.mimeType.startsWith("image/"))
+    return "🖼️";
+
+  if(file.mimeType==="application/pdf")
+    return "📕";
+
+  return "📦";
+}
+
+
+function renderDriveFiles(){
+
+  const container=
+    document.getElementById(
+      "driveFiles"
+    );
+
+  container.innerHTML="";
+
+  if(!driveFiles.length){
+
+    container.innerHTML=
+      `<div class="info">
+        No files found.
+      </div>`;
+
+    return;
+  }
+
+  for(const file of driveFiles){
+
+    const row=
+      document.createElement("div");
+
+    row.className="drive-row";
+
+    const size=
+      file.size
+      ? formatBytes(Number(file.size))
+      : "Google file";
+
+    row.innerHTML=`
+
+      <div class="drive-icon">
+        ${driveIcon(file)}
+      </div>
+
+      <div class="drive-name">
+
+        <strong>
+          ${escapeHtml(file.name)}
+        </strong>
+
+        <div class="drive-meta">
+          ${escapeHtml(file.mimeType)}
+          · ${escapeHtml(size)}
+        </div>
+
+      </div>
+
+      ${
+        file.mimeType !==
+        "application/vnd.google-apps.folder"
+        ?
+        `<button
+          class="green"
+          onclick="copyDriveFile('${file.id}')">
+          📋 Copy
+        </button>`
+        :
+        ""
+      }
+
+    `;
+
+    container.appendChild(row);
+  }
+}
+
+
+/* ======================================================
+   COPY DRIVE FILE
+====================================================== */
+
+function copyDriveFile(fileId){
+
+  const file=
+    driveFiles.find(
+      f=>f.id===fileId
+    );
+
+  if(!file)
+    return;
+
+  copiedItem={
+    type:"drive-file",
+    file:file
+  };
+
+  setStatus(
+    "driveStatus",
+    `📋 Copied from Drive: ${file.name}`,
+    "success"
+  );
+
+  setStatus(
+    "pasteStatus",
+    `Ready to paste from Drive: ${file.name}`,
+    "success"
+  );
+}
+
+
+/* ======================================================
+   DRIVE → LOCAL
+====================================================== */
+
+async function copyDriveFileToLocal(
+  file,
+  destination
+){
+
+  try{
+
+    setStatus(
+      "pasteStatus",
+      `Preparing ${file.name}...`
+    );
+
+    const blob=
+      await downloadDriveFile(file);
+
+    let outputName=
+      file.name;
+
+    const outputHandle=
+      await destination.getFileHandle(
+        outputName,
+        {create:true}
+      );
+
+    const writable=
+      await outputHandle.createWritable();
+
+    const reader=
+      blob.stream().getReader();
+
+    let written=0;
+
+    const total=blob.size;
+
+    const start=performance.now();
+
+    while(true){
+
+      const {value,done}=
+        await reader.read();
+
+      if(done)
+        break;
+
+      await writable.write(value);
+
+      written+=value.byteLength;
+
+      updateCopyProgress(
+        written,
+        total,
+        start
+      );
+    }
+
+    await writable.close();
+
+    setProgress(
+      "driveProgress",
+      "driveProgressText",
+      100,
+      "100% — Done"
+    );
+
+    setStatus(
+      "pasteStatus",
+      `✅ ${file.name} copied from Google Drive.`,
+      "success"
+    );
+
+  }catch(error){
+
+    console.error(error);
+
+    setStatus(
+      "pasteStatus",
+      error.message,
+      "error"
+    );
+  }
+}
+
+
+/* ======================================================
+   DOWNLOAD / EXPORT DRIVE FILE
+====================================================== */
+
+async function downloadDriveFile(file){
+
+  const googleTypes={
+
+    "application/vnd.google-apps.document":
+      "application/pdf",
+
+    "application/vnd.google-apps.spreadsheet":
+      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+
+    "application/vnd.google-apps.presentation":
+      "application/vnd.openxmlformats-officedocument.presentationml.presentation"
+
+  };
+
+
+  let url;
+
+  let finalName=file.name;
+
+
+  if(
+    file.mimeType ===
+    "application/vnd.google-apps.folder"
+  ){
+
+    throw new Error(
+      "Folder copying from Google Drive is not supported by this button yet."
+    );
+  }
+
+
+  if(googleTypes[file.mimeType]){
+
+    const exportMime=
+      googleTypes[file.mimeType];
+
+    url=
+      "https://www.googleapis.com/drive/v3/files/"+
+      encodeURIComponent(file.id)+
+      "/export?mimeType="+
+      encodeURIComponent(exportMime);
+
+    if(file.mimeType.includes("document"))
+      finalName+=".pdf";
+
+    else if(
+      file.mimeType.includes("spreadsheet")
+    )
+      finalName+=".xlsx";
+
+    else if(
+      file.mimeType.includes("presentation")
+    )
+      finalName+=".pptx";
+
+  }else{
+
+    url=
+      "https://www.googleapis.com/drive/v3/files/"+
+      encodeURIComponent(file.id)+
+      "?alt=media";
+  }
+
+
+  const response=
+    await driveRequest(url);
+
+
+  if(!response.body){
+
+    return await response.blob();
+  }
+
+
+  const reader=
+    response.body.getReader();
+
+  const chunks=[];
+
+  let total=0;
+
+  while(true){
+
+    const {value,done}=
+      await reader.read();
+
+    if(done)
+      break;
+
+    chunks.push(value);
+
+    total+=value.byteLength;
+
+    setStatus(
+      "pasteStatus",
+      `Downloading ${file.name}: ${formatBytes(total)}`
+    );
+  }
+
+
+  const blob=
+    new Blob(
+      chunks,
+      {
+        type:
+          response.headers.get(
+            "content-type"
+          ) ||
+          "application/octet-stream"
+      }
+    );
+
+  return blob;
+}
+
+
+/* ======================================================
+   STARTUP
+====================================================== */
+
+window.addEventListener(
+  "load",
+  ()=>{
+    initGoogle();
+  }
+);
 
 </script>
 
