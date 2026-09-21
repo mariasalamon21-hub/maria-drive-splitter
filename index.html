@@ -4,33 +4,37 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>ZArchiver Web Explorer 📁</title>
+  <!-- مكتبة تسجيل الدخول الخاصة بـ Google -->
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
   <style>
-    * { box-sizing: border-box; font-family: system-ui, sans-serif; }
-    body { background-color: #121212; color: #fff; margin: 0; padding: 20px; }
-    .container { max-width: 950px; margin: 0 auto; background: #1e1e1e; border-radius: 12px; padding: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.5); }
-    header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #333; padding-bottom: 15px; margin-bottom: 20px; }
-    h1 { color: #ffb74d; margin: 0; font-size: 22px; }
-    .btn { background: #333; color: #fff; border: 1px solid #555; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-size: 14px; transition: 0.2s; }
-    .btn:hover { background: #444; }
-    .btn-drive { background: #4285f4; border: none; font-weight: bold; }
-    .btn-drive:hover { background: #3367d6; }
+    * { box-sizing: border-box; font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif; }
+    body { background-color: #121212; color: #e0e0e0; margin: 0; padding: 20px; }
+    .container { max-width: 950px; margin: 0 auto; background: #1e1e1e; border-radius: 12px; padding: 25px; box-shadow: 0 8px 24px rgba(0,0,0,0.6); border: 1px solid #2a2a2a; }
+    header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #333; padding-bottom: 18px; margin-bottom: 20px; }
+    h1 { color: #ffb74d; margin: 0; font-size: 24px; display: flex; align-items: center; gap: 10px; }
+    .btn { background: #2d2d2d; color: #fff; border: 1px solid #444; padding: 10px 18px; border-radius: 8px; cursor: pointer; font-size: 14px; font-weight: 500; transition: all 0.2s ease; display: inline-flex; align-items: center; gap: 8px; }
+    .btn:hover { background: #3d3d3d; border-color: #666; }
+    .btn:disabled { opacity: 0.4; cursor: not-allowed; }
+    .btn-drive { background: #1a73e8; border: none; font-weight: bold; }
+    .btn-drive:hover { background: #1557b0; }
     .btn-action { background: #ffb74d; color: #121212; border: none; font-weight: bold; }
     .btn-action:hover { background: #ffa726; }
     
-    /* File Explorer Layout */
-    .explorer-bar { display: flex; gap: 10px; margin-bottom: 15px; }
-    .file-list { background: #2a2a2a; border-radius: 8px; border: 1px solid #333; min-height: 250px; max-height: 400px; overflow-y: auto; }
-    .file-item { display: flex; justify-content: space-between; align-items: center; padding: 10px 15px; border-bottom: 1px solid #333; cursor: pointer; }
-    .file-item:hover { background: #333; }
-    .file-info { display: flex; align-items: center; gap: 10px; }
-    .file-icon { font-size: 18px; }
+    .explorer-bar { display: flex; gap: 12px; margin-bottom: 15px; flex-wrap: wrap; }
+    .file-list { background: #262626; border-radius: 10px; border: 1px solid #333; min-height: 280px; max-height: 420px; overflow-y: auto; }
+    .file-item { display: flex; justify-content: space-between; align-items: center; padding: 12px 18px; border-bottom: 1px solid #333; transition: background 0.15s ease; }
+    .file-item:last-child { border-bottom: none; }
+    .file-item:hover { background: #323232; }
+    .file-info { display: flex; align-items: center; gap: 12px; font-size: 15px; }
+    .file-icon { font-size: 20px; }
     
-    /* Operations Panel */
-    .panel { background: #252525; padding: 15px; border-radius: 8px; margin-top: 20px; border: 1px solid #333; }
-    .size-group { display: flex; gap: 10px; margin: 10px 0; }
-    .size-group input { flex: 2; padding: 8px; background: #333; border: 1px solid #444; color: #fff; border-radius: 6px; }
-    .size-group select { flex: 1; padding: 8px; background: #333; border: 1px solid #444; color: #fff; border-radius: 6px; }
-    .status { margin-top: 10px; font-size: 13px; color: #81c784; }
+    .panel { background: #252525; padding: 20px; border-radius: 10px; margin-top: 20px; border: 1px solid #333; }
+    .panel h3 { margin-top: 0; color: #64b5f6; font-size: 18px; }
+    .size-group { display: flex; gap: 12px; margin: 12px 0 18px 0; }
+    .size-group input { flex: 2; padding: 10px 14px; background: #333; border: 1px solid #444; color: #fff; border-radius: 8px; font-size: 15px; }
+    .size-group select { flex: 1; padding: 10px 14px; background: #333; border: 1px solid #444; color: #fff; border-radius: 8px; font-size: 15px; }
+    .status { margin-top: 15px; font-size: 14px; color: #81c784; padding: 10px; background: #1b2e1e; border-radius: 6px; border: 1px solid #2e4d32; display: none; }
+    .status.show { display: block; }
   </style>
 </head>
 <body>
@@ -43,23 +47,20 @@
     </div>
   </header>
 
-  <!-- شريط التحكم بالملفات -->
   <div class="explorer-bar">
     <button class="btn" onclick="openLocalFolder()">📂 فتح مجلد من الجهاز</button>
     <button class="btn" id="pasteBtn" onclick="pasteFile()" disabled>📋 Paste (لصق)</button>
   </div>
 
-  <!-- عرض قائمة الملفات والمجلدات -->
   <div class="file-list" id="fileList">
-    <div style="padding: 20px; text-align: center; color: #aaa;">اضغطي على "فتح مجلد من الجهاز" لاستكشاف الملفات</div>
+    <div style="padding: 40px; text-align: center; color: #888;">اضغطي على "فتح مجلد من الجهاز" لاستكشاف الملفات والمجلدات</div>
   </div>
 
-  <!-- لوحة عمليات التقسيم والدمج -->
   <div class="panel">
-    <h3 style="margin-top: 0; color: #64b5f6;">أدوات التقسيم والدمج</h3>
-    <label>حدد حجم التقسيم للملف المحدد:</label>
+    <h3>أدوات التقسيم والدمج</h3>
+    <label style="font-size: 14px; color: #ccc;">حدد حجم التقسيم للملف المحدد:</label>
     <div class="size-group">
-      <input type="number" id="chunkSize" value="500" min="1" step="any">
+      <input type="number" id="chunkSize" value="500" min="0.000001" step="any" placeholder="أدخل الحجم">
       <select id="unitSelect">
         <option value="bit">بت (Bit)</option>
         <option value="B">بايت (Byte)</option>
@@ -69,9 +70,9 @@
         <option value="TB">تيرا بايت (TB)</option>
       </select>
     </div>
-    <div style="display: flex; gap: 10px;">
-      <button class="btn btn-action" style="flex: 1;" onclick="splitSelectedFile()">تقسيم الملف المحدد</button>
-      <button class="btn btn-action" style="flex: 1;" onclick="mergeSelectedFiles()">دمج الأجزاء المحددة</button>
+    <div style="display: flex; gap: 12px; flex-wrap: wrap;">
+      <button class="btn btn-action" style="flex: 1; min-width: 180px; justify-content: center;" onclick="splitSelectedFile()">تقسيم الملف المحدد</button>
+      <button class="btn btn-action" style="flex: 1; min-width: 180px; justify-content: center;" onclick="mergeSelectedFiles()">دمج الأجزاء المحددة</button>
     </div>
     <div id="statusText" class="status"></div>
   </div>
@@ -82,7 +83,6 @@
   let fileEntries = [];
   let clipboardFileHandle = null;
 
-  // 1. فتح مجلد محلي بالكامل باستعمال File System Access API
   async function openLocalFolder() {
     try {
       currentDirHandle = await window.showDirectoryPicker();
@@ -92,7 +92,6 @@
     }
   }
 
-  // تحديث قائمة الملفات في الواجهة
   async function refreshFileList() {
     if (!currentDirHandle) return;
     const fileListDiv = document.getElementById('fileList');
@@ -112,7 +111,7 @@
           <span>${entry.name}</span>
         </div>
         <div>
-          ${entry.kind === 'file' ? `<button class="btn" onclick="copyFile('${entry.name}', event)">Copy</button>` : ''}
+          ${entry.kind === 'file' ? `<button class="btn" style="padding: 4px 10px; font-size: 12px;" onclick="copyFile('${entry.name}', event)">Copy</button>` : ''}
         </div>
       `;
       
@@ -120,34 +119,37 @@
     }
   }
 
-  // 2. عمليات Copy & Paste
+  function showStatus(text) {
+    const statusEl = document.getElementById('statusText');
+    statusEl.innerText = text;
+    statusEl.classList.add('show');
+  }
+
   async function copyFile(fileName, event) {
     event.stopPropagation();
     clipboardFileHandle = await currentDirHandle.getFileHandle(fileName);
     document.getElementById('pasteBtn').disabled = false;
-    document.getElementById('statusText').innerText = `تم نسخ ${fileName} إلى الحافظة.`;
+    showStatus(`تم نسخ ${fileName} إلى الحافظة.`);
   }
 
   async function pasteFile() {
     if (!clipboardFileHandle || !currentDirHandle) return;
     const file = await clipboardFileHandle.getFile();
-    const newFileHandle = await currentDirHandle.getFileHandle(`نسخة_${file.name}`, { create: true });
+    const newFileHandle = await currentDirHandle.getFileHandle(`copy_${file.name}`, { create: true });
     const writable = await newFileHandle.createWritable();
     await writable.write(file);
     await writable.close();
     
-    document.getElementById('statusText').innerText = `تم لصق الملف بنجاح!`;
+    showStatus(`تم لصق الملف بنجاح!`);
     await refreshFileList();
   }
 
-  // 3. تقسيم الملف المحدد
   async function splitSelectedFile() {
     if (!fileEntries.length) {
       alert("الرجاء فتح مجلد واختيار ملف أولاً!");
       return;
     }
     
-    // البحث عن أول ملف في القائمة للتجربة
     const fileEntry = fileEntries.find(e => e.kind === 'file');
     if (!fileEntry) return alert("لا يوجد ملفات لتقسيمها في المجلد الحالي!");
 
@@ -166,13 +168,12 @@
     let offset = 0;
     let partNum = 1;
 
-    document.getElementById('statusText').innerText = "جاري التقسيم وتطوير الأجزاء داخل المجلد...";
+    showStatus("جاري التقسيم وتوليد الأجزاء داخل المجلد...");
 
     while (offset < file.size) {
       const chunk = file.slice(offset, offset + chunkSizeInBytes);
       const partName = `${file.name}.part${String(partNum).padStart(3, '0')}`;
       
-      // كتابة الجزء مباشرة في المجلد
       const partHandle = await currentDirHandle.getFileHandle(partName, { create: true });
       const writable = await partHandle.createWritable();
       await writable.write(chunk);
@@ -182,13 +183,54 @@
       partNum++;
     }
 
-    document.getElementById('statusText').innerText = `تم تقسيم ${file.name} بنجاح إلى ${partNum - 1} أجزاء!`;
+    showStatus(`تم تقسيم ${file.name} بنجاح إلى ${partNum - 1} أجزاء!`);
     await refreshFileList();
   }
 
-  // 4. الربط مع Google Drive API
+  async function mergeSelectedFiles() {
+    if (!currentDirHandle) return alert("الرجاء فتح مجلد أولاً!");
+    
+    const partEntries = fileEntries.filter(e => e.kind === 'file' && /\.part\d+$/i.test(e.name));
+    if (!partEntries.length) return alert("لم يتم العثور على أجزاء مقسمة (.part) في هذا المجلد!");
+
+    partEntries.sort((a, b) => a.name.localeCompare(b.name));
+    showStatus("جاري دمج الأجزاء...");
+
+    let originalName = partEntries[0].name.replace(/\.part\d+$/i, '');
+    const mergedHandle = await currentDirHandle.getFileHandle(`merged_${originalName}`, { create: true });
+    const writable = await mergedHandle.createWritable();
+
+    for (const entry of partEntries) {
+      const file = await entry.getFile();
+      await writable.write(file);
+    }
+    await writable.close();
+
+    showStatus(`تم دمج جميع الأجزاء بنجاح في الملف: merged_${originalName}`);
+    await refreshFileList();
+  }
+
+  // دالة الربط مع Google Drive API
   function connectGoogleDrive() {
-    alert("لربط Google Drive الكامل على الويب، يلزم إضافة Client ID الخاص بـ OAuth2 من Google Cloud Console لقراءة ملفات الحساب مباشرة.");
+    // ضعي Client ID الخاص بكِ هنا من Google Cloud Console
+    const CLIENT_ID = 'YOUR_CLIENT_ID_HERE.apps.googleusercontent.com';
+    const SCOPES = 'https://www.googleapis.com/auth/drive.readonly';
+
+    if (CLIENT_ID === 'YOUR_CLIENT_ID_HERE.apps.googleusercontent.com') {
+      alert("الرجاء استبدال YOUR_CLIENT_ID_HERE بالـ Client ID الخاص بكِ من Google Cloud Console أولاً.");
+      return;
+    }
+
+    const client = google.accounts.oauth2.initTokenClient({
+      client_id: CLIENT_ID,
+      scope: SCOPES,
+      callback: (response) => {
+        if (response.access_token) {
+          showStatus("تم الاتصال بـ Google Drive بنجاح!");
+        }
+      },
+    });
+    client.requestAccessToken();
   }
 </script>
 
