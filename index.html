@@ -4,13 +4,12 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>ZArchiver Web Explorer 📁</title>
-  <!-- مكتبة تسجيل الدخول الخاصة بـ Google -->
   <script src="https://accounts.google.com/gsi/client" async defer></script>
   <style>
-    * { box-sizing: border-box; font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif; }
+    * { box-sizing: border-box; font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
     body { background-color: #121212; color: #e0e0e0; margin: 0; padding: 20px; }
     .container { max-width: 950px; margin: 0 auto; background: #1e1e1e; border-radius: 12px; padding: 25px; box-shadow: 0 8px 24px rgba(0,0,0,0.6); border: 1px solid #2a2a2a; }
-    header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #333; padding-bottom: 18px; margin-bottom: 20px; }
+    header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #333; padding-bottom: 18px; margin-bottom: 20px; flex-wrap: wrap; gap: 10px; }
     h1 { color: #ffb74d; margin: 0; font-size: 24px; display: flex; align-items: center; gap: 10px; }
     .btn { background: #2d2d2d; color: #fff; border: 1px solid #444; padding: 10px 18px; border-radius: 8px; cursor: pointer; font-size: 14px; font-weight: 500; transition: all 0.2s ease; display: inline-flex; align-items: center; gap: 8px; }
     .btn:hover { background: #3d3d3d; border-color: #666; }
@@ -21,10 +20,9 @@
     .btn-action:hover { background: #ffa726; }
     
     .explorer-bar { display: flex; gap: 12px; margin-bottom: 15px; flex-wrap: wrap; }
-    .file-list { background: #262626; border-radius: 10px; border: 1px solid #333; min-height: 280px; max-height: 420px; overflow-y: auto; }
-    .file-item { display: flex; justify-content: space-between; align-items: center; padding: 12px 18px; border-bottom: 1px solid #333; transition: background 0.15s ease; }
+    .file-list { background: #262626; border-radius: 10px; border: 1px solid #333; min-height: 280px; max-height: 420px; overflow-y: auto; padding: 10px; }
+    .file-item { display: flex; justify-content: space-between; align-items: center; padding: 12px 18px; border-bottom: 1px solid #333; }
     .file-item:last-child { border-bottom: none; }
-    .file-item:hover { background: #323232; }
     .file-info { display: flex; align-items: center; gap: 12px; font-size: 15px; }
     .file-icon { font-size: 20px; }
     
@@ -47,18 +45,20 @@
     </div>
   </header>
 
+  <!-- شريط الأزرار المستقلة -->
   <div class="explorer-bar">
-    <button class="btn" onclick="openLocalFolder()">📂 فتح مجلد من الجهاز</button>
-    <button class="btn" id="pasteBtn" onclick="pasteFile()" disabled>📋 Paste (لصق)</button>
+    <button class="btn" onclick="openLocalFolder()">📂 فتح مجلد الجهاز</button>
+    <button class="btn btn-action" onclick="pickFileToCopy()">📋 Copy (اختيار ملف للنسخ)</button>
+    <button class="btn btn-action" id="pasteBtn" onclick="pickFolderAndPaste()" disabled>📥 Paste (اختيار مكان اللصق)</button>
   </div>
 
   <div class="file-list" id="fileList">
-    <div style="padding: 40px; text-align: center; color: #888;">اضغطي على "فتح مجلد من الجهاز" لاستكشاف الملفات والمجلدات</div>
+    <div style="padding: 40px; text-align: center; color: #888;">استخدم الأزرار بالأعلى لفتح المجلدات أو تنفيذ عمليات النسخ واللصق</div>
   </div>
 
   <div class="panel">
     <h3>أدوات التقسيم والدمج</h3>
-    <label style="font-size: 14px; color: #ccc;">حدد حجم التقسيم للملف المحدد:</label>
+    <label style="font-size: 14px; color: #ccc;">حدد حجم التقسيم للملف:</label>
     <div class="size-group">
       <input type="number" id="chunkSize" value="500" min="0.000001" step="any" placeholder="أدخل الحجم">
       <select id="unitSelect">
@@ -71,8 +71,8 @@
       </select>
     </div>
     <div style="display: flex; gap: 12px; flex-wrap: wrap;">
-      <button class="btn btn-action" style="flex: 1; min-width: 180px; justify-content: center;" onclick="splitSelectedFile()">تقسيم الملف المحدد</button>
-      <button class="btn btn-action" style="flex: 1; min-width: 180px; justify-content: center;" onclick="mergeSelectedFiles()">دمج الأجزاء المحددة</button>
+      <button class="btn btn-action" style="flex: 1; min-width: 180px; justify-content: center;" onclick="splitSelectedFile()">تقسيم الملف</button>
+      <button class="btn btn-action" style="flex: 1; min-width: 180px; justify-content: center;" onclick="mergeSelectedFiles()">دمج الأجزاء</button>
     </div>
     <div id="statusText" class="status"></div>
   </div>
@@ -81,14 +81,15 @@
 <script>
   let currentDirHandle = null;
   let fileEntries = [];
-  let clipboardFileHandle = null;
+  let storedFileToCopy = null;
 
   async function openLocalFolder() {
     try {
       currentDirHandle = await window.showDirectoryPicker();
       await refreshFileList();
+      showStatus("تم فتح المجلد بنجاح!");
     } catch (err) {
-      console.log('تم إلغاء اختيار المجلد أو المتصفح لا يدعم الميزة');
+      console.log('تم إلغاء اختيار المجلد');
     }
   }
 
@@ -102,7 +103,6 @@
       fileEntries.push(entry);
       const item = document.createElement('div');
       item.className = 'file-item';
-      
       const icon = entry.kind === 'directory' ? '📁' : '📄';
       
       item.innerHTML = `
@@ -110,11 +110,7 @@
           <span class="file-icon">${icon}</span>
           <span>${entry.name}</span>
         </div>
-        <div>
-          ${entry.kind === 'file' ? `<button class="btn" style="padding: 4px 10px; font-size: 12px;" onclick="copyFile('${entry.name}', event)">Copy</button>` : ''}
-        </div>
       `;
-      
       fileListDiv.appendChild(item);
     }
   }
@@ -125,73 +121,90 @@
     statusEl.classList.add('show');
   }
 
-  async function copyFile(fileName, event) {
-    event.stopPropagation();
-    clipboardFileHandle = await currentDirHandle.getFileHandle(fileName);
-    document.getElementById('pasteBtn').disabled = false;
-    showStatus(`تم نسخ ${fileName} إلى الحافظة.`);
+  // زر Copy المستقل: يفتح نافذة لاختيار أي ملف في الجهاز لنسخه
+  async function pickFileToCopy() {
+    try {
+      [storedFileToCopy] = await window.showOpenFilePicker();
+      if (storedFileToCopy) {
+        document.getElementById('pasteBtn').disabled = false;
+        showStatus(`تم نسخ الملف: ${storedFileToCopy.name} بنجاح. اضغط الآن على Paste لتحديد مكان اللصق.`);
+      }
+    } catch (err) {
+      console.log('تم إلغاء اختيار الملف للنسخ');
+    }
   }
 
-  async function pasteFile() {
-    if (!clipboardFileHandle || !currentDirHandle) return;
-    const file = await clipboardFileHandle.getFile();
-    const newFileHandle = await currentDirHandle.getFileHandle(`copy_${file.name}`, { create: true });
-    const writable = await newFileHandle.createWritable();
-    await writable.write(file);
-    await writable.close();
-    
-    showStatus(`تم لصق الملف بنجاح!`);
-    await refreshFileList();
+  // زر Paste المستقل: يفتح نافذة لاختيار مجلد الهدف ولصق الملف فيه
+  async function pickFolderAndPaste() {
+    if (!storedFileToCopy) return;
+    try {
+      const destinationDirHandle = await window.showDirectoryPicker();
+      if (destinationDirHandle) {
+        const file = await storedFileToCopy.getFile();
+        const newFileHandle = await destinationDirHandle.getFileHandle(`copy_${file.name}`, { create: true });
+        const writable = await newFileHandle.createWritable();
+        await writable.write(file);
+        await writable.close();
+        
+        showStatus(`تم لصق الملف بنجاح في المجلد المحدد باسم: copy_${file.name}`);
+      }
+    } catch (err) {
+      console.log('تم إلغاء اختيار مجلد اللصق');
+    }
   }
 
   async function splitSelectedFile() {
-    if (!fileEntries.length) {
-      alert("الرجاء فتح مجلد واختيار ملف أولاً!");
+    if (!currentDirHandle) {
+      alert("الرجاء فتح مجلد أولاً لاحتواء الملفات المقسمة!");
       return;
     }
     
-    const fileEntry = fileEntries.find(e => e.kind === 'file');
-    if (!fileEntry) return alert("لا يوجد ملفات لتقسيمها في المجلد الحالي!");
-
-    const file = await fileEntry.getFile();
-    const sizeValue = parseFloat(document.getElementById('chunkSize').value);
-    const unit = document.getElementById('unitSelect').value;
-
-    let chunkSizeInBytes = sizeValue;
-    if (unit === 'bit') chunkSizeInBytes = sizeValue / 8;
-    else if (unit === 'B') chunkSizeInBytes = sizeValue;
-    else if (unit === 'KB') chunkSizeInBytes = sizeValue * 1024;
-    else if (unit === 'MB') chunkSizeInBytes = sizeValue * 1024 * 1024;
-    else if (unit === 'GB') chunkSizeInBytes = sizeValue * 1024 * 1024 * 1024;
-    else if (unit === 'TB') chunkSizeInBytes = sizeValue * 1024 * 1024 * 1024 * 1024;
-
-    let offset = 0;
-    let partNum = 1;
-
-    showStatus("جاري التقسيم وتوليد الأجزاء داخل المجلد...");
-
-    while (offset < file.size) {
-      const chunk = file.slice(offset, offset + chunkSizeInBytes);
-      const partName = `${file.name}.part${String(partNum).padStart(3, '0')}`;
+    try {
+      const [fileHandle] = await window.showOpenFilePicker();
+      if (!fileHandle) return;
+      const file = await fileHandle.getFile();
       
-      const partHandle = await currentDirHandle.getFileHandle(partName, { create: true });
-      const writable = await partHandle.createWritable();
-      await writable.write(chunk);
-      await writable.close();
+      const sizeValue = parseFloat(document.getElementById('chunkSize').value);
+      const unit = document.getElementById('unitSelect').value;
 
-      offset += chunkSizeInBytes;
-      partNum++;
+      let chunkSizeInBytes = sizeValue;
+      if (unit === 'bit') chunkSizeInBytes = sizeValue / 8;
+      else if (unit === 'B') chunkSizeInBytes = sizeValue;
+      else if (unit === 'KB') chunkSizeInBytes = sizeValue * 1024;
+      else if (unit === 'MB') chunkSizeInBytes = sizeValue * 1024 * 1024;
+      else if (unit === 'GB') chunkSizeInBytes = sizeValue * 1024 * 1024 * 1024;
+      else if (unit === 'TB') chunkSizeInBytes = sizeValue * 1024 * 1024 * 1024 * 1024;
+
+      let offset = 0;
+      let partNum = 1;
+
+      showStatus("جاري تقسيم الملف وحفظ الأجزاء داخل المجلد المفتوح...");
+
+      while (offset < file.size) {
+        const chunk = file.slice(offset, offset + chunkSizeInBytes);
+        const partName = `${file.name}.part${String(partNum).padStart(3, '0')}`;
+        
+        const partHandle = await currentDirHandle.getFileHandle(partName, { create: true });
+        const writable = await partHandle.createWritable();
+        await writable.write(chunk);
+        await writable.close();
+
+        offset += chunkSizeInBytes;
+        partNum++;
+      }
+
+      showStatus(`تم تقسيم الملف بنجاح إلى ${partNum - 1} أجزاء داخل المجلد!`);
+      await refreshFileList();
+    } catch (err) {
+      console.log('تم الغاء اختيار الملف للتقسيم');
     }
-
-    showStatus(`تم تقسيم ${file.name} بنجاح إلى ${partNum - 1} أجزاء!`);
-    await refreshFileList();
   }
 
   async function mergeSelectedFiles() {
-    if (!currentDirHandle) return alert("الرجاء فتح مجلد أولاً!");
+    if (!currentDirHandle) return alert("الرجاء فتح مجلد يحتوي على الأجزاء أولاً!");
     
     const partEntries = fileEntries.filter(e => e.kind === 'file' && /\.part\d+$/i.test(e.name));
-    if (!partEntries.length) return alert("لم يتم العثور على أجزاء مقسمة (.part) في هذا المجلد!");
+    if (!partEntries.length) return alert("لم يتم العثور على أجزاء (.part) في المجلد المفتوح!");
 
     partEntries.sort((a, b) => a.name.localeCompare(b.name));
     showStatus("جاري دمج الأجزاء...");
@@ -206,11 +219,10 @@
     }
     await writable.close();
 
-    showStatus(`تم دمج جميع الأجزاء بنجاح في الملف: merged_${originalName}`);
+    showStatus(`تم دمج الأجزاء بنجاح بالملف: merged_${originalName}`);
     await refreshFileList();
   }
 
-  // دالة الربط مع Google Drive API مع الـ Client ID الخاص بكِ
   function connectGoogleDrive() {
     const CLIENT_ID = '304831987723-5g9mvugqaoi8uhg6vofrjqqm77u48onh.apps.googleusercontent.com';
     const SCOPES = 'https://www.googleapis.com/auth/drive.readonly';
