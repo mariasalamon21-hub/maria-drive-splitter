@@ -210,16 +210,10 @@
     await refreshFileList();
   }
 
-  // دالة الربط مع Google Drive API
+  // دالة الربط مع Google Drive API مع الـ Client ID الخاص بكِ
   function connectGoogleDrive() {
-    // ضعي Client ID الخاص بكِ هنا من Google Cloud Console
-    const CLIENT_ID = 'YOUR_CLIENT_ID_HERE.apps.googleusercontent.com';
+    const CLIENT_ID = '304831987723-5g9mvugqaoi8uhg6vofrjqqm77u48onh.apps.googleusercontent.com';
     const SCOPES = 'https://www.googleapis.com/auth/drive.readonly';
-
-    if (CLIENT_ID === 'YOUR_CLIENT_ID_HERE.apps.googleusercontent.com') {
-      alert("الرجاء استبدال YOUR_CLIENT_ID_HERE بالـ Client ID الخاص بكِ من Google Cloud Console أولاً.");
-      return;
-    }
 
     const client = google.accounts.oauth2.initTokenClient({
       client_id: CLIENT_ID,
