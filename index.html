@@ -1,171 +1,265 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-    <meta charset="UTF-8">
-    <title>محاكي البيانو بعزف الأرقام</title>
-    <style>
-        body {
-            background-color: #1e293b;
-            color: #fff;
-            font-family: Arial, sans-serif;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            padding: 30px;
-        }
-
-        .container {
-            background-color: #0f172a;
-            padding: 25px;
-            border-radius: 12px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
-            text-align: center;
-            max-width: 500px;
-            width: 100%;
-        }
-
-        .input-group {
-            margin-bottom: 20px;
-            display: flex;
-            gap: 10px;
-        }
-
-        input[type="text"] {
-            flex: 1;
-            padding: 12px;
-            border-radius: 6px;
-            border: 1px solid #334155;
-            background-color: #1e293b;
-            color: #fff;
-            font-size: 16px;
-            text-align: center;
-            outline: none;
-        }
-
-        button {
-            padding: 12px 24px;
-            background-color: #2563eb;
-            color: white;
-            border: none;
-            border-radius: 6px;
-            font-size: 16px;
-            font-weight: bold;
-            cursor: pointer;
-            transition: background 0.2s;
-        }
-
-        button:hover { background-color: #1d4ed8; }
-
-        /* مفاتيح البيانو المرئية */
-        .piano {
-            display: flex;
-            justify-content: center;
-            margin-top: 15px;
-            background: #000;
-            padding: 10px;
-            border-radius: 8px;
-        }
-
-        .key {
-            width: 40px;
-            height: 140px;
-            background: white;
-            border: 1px solid #ccc;
-            margin: 0 2px;
-            border-radius: 0 0 4px 4px;
-            display: flex;
-            align-items: flex-end;
-            justify-content: center;
-            padding-bottom: 8px;
-            color: #333;
-            font-weight: bold;
-            transition: background 0.1s;
-        }
-
-        .key.playing {
-            background: #60a5fa !important;
-            transform: translateY(2px);
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ZArchiver Web Explorer 📁</title>
+  <!-- مكتبات تسجيل الدخول واستعراض جوجل درايف -->
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
+  <script src="https://apis.google.com/js/api.js" async defer></script>
+  <style>
+    * { box-sizing: border-box; font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
+    body { background-color: #121212; color: #e0e0e0; margin: 0; padding: 20px; }
+    .container { max-width: 950px; margin: 0 auto; background: #1e1e1e; border-radius: 12px; padding: 25px; box-shadow: 0 8px 24px rgba(0,0,0,0.6); border: 1px solid #2a2a2a; }
+    header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #333; padding-bottom: 18px; margin-bottom: 20px; flex-wrap: wrap; gap: 10px; }
+    h1 { color: #ffb74d; margin: 0; font-size: 24px; display: flex; align-items: center; gap: 10px; }
+    .btn { background: #2d2d2d; color: #fff; border: 1px solid #444; padding: 10px 18px; border-radius: 8px; cursor: pointer; font-size: 14px; font-weight: 500; transition: all 0.2s ease; display: inline-flex; align-items: center; gap: 8px; }
+    .btn:hover { background: #3d3d3d; border-color: #666; }
+    .btn:disabled { opacity: 0.4; cursor: not-allowed; }
+    .btn-drive { background: #1a73e8; border: none; font-weight: bold; }
+    .btn-drive:hover { background: #1557b0; }
+    .btn-action { background: #ffb74d; color: #121212; border: none; font-weight: bold; }
+    .btn-action:hover { background: #ffa726; }
+    
+    .explorer-bar { display: flex; gap: 12px; margin-bottom: 15px; flex-wrap: wrap; }
+    .file-list { background: #262626; border-radius: 10px; border: 1px solid #333; min-height: 280px; max-height: 420px; overflow-y: auto; padding: 10px; }
+    .file-item { display: flex; justify-content: space-between; align-items: center; padding: 12px 18px; border-bottom: 1px solid #333; }
+    .file-item:last-child { border-bottom: none; }
+    .file-info { display: flex; align-items: center; gap: 12px; font-size: 15px; }
+    .file-icon { font-size: 20px; }
+    
+    .panel { background: #252525; padding: 20px; border-radius: 10px; margin-top: 20px; border: 1px solid #333; }
+    .panel h3 { margin-top: 0; color: #64b5f6; font-size: 18px; }
+    .size-group { display: flex; gap: 12px; margin: 12px 0 18px 0; }
+    .size-group input { flex: 2; padding: 10px 14px; background: #333; border: 1px solid #444; color: #fff; border-radius: 8px; font-size: 15px; }
+    .size-group select { flex: 1; padding: 10px 14px; background: #333; border: 1px solid #444; color: #fff; border-radius: 8px; font-size: 15px; }
+    .status { margin-top: 15px; font-size: 14px; color: #81c784; padding: 10px; background: #1b2e1e; border-radius: 6px; border: 1px solid #2e4d32; display: none; }
+    .status.show { display: block; }
+  </style>
 </head>
 <body>
 
 <div class="container">
-    <h2>عازف نغمات البيانو بالأرقام</h2>
-    <p style="font-size: 13px; color: #94a3b8;">اكتبي الأرقام من 1 إلى 7 (مثال: 1 3 5 3 1)</p>
-    
-    <div class="input-group">
-        <input type="text" id="notesInput" value="1 2 3 4 5 6 7" placeholder="أدخلي الأرقام هنا...">
-        <button onclick="playSequence()">عزف النغمة</button>
+  <header>
+    <h1>ZArchiver Web Explorer 📁</h1>
+    <div>
+      <button class="btn btn-drive" onclick="connectGoogleDrive()">🔗 فتح Google Drive</button>
     </div>
+  </header>
 
-    <!-- مفاتيح البيانو لتوضيح النغمة المعزوفة -->
-    <div class="piano">
-        <div class="key" id="key-1">1</div>
-        <div class="key" id="key-2">2</div>
-        <div class="key" id="key-3">3</div>
-        <div class="key" id="key-4">4</div>
-        <div class="key" id="key-5">5</div>
-        <div class="key" id="key-6">6</div>
-        <div class="key" id="key-7">7</div>
+  <div class="explorer-bar">
+    <button class="btn" onclick="openNetworkFile()">📂 فتح ملف (مكاني / شبكة)</button>
+    <button class="btn btn-action" onclick="pickFileToCopy()">📋 Copy (اختيار ملف للنسخ)</button>
+    <button class="btn btn-action" id="pasteBtn" onclick="pickFolderAndPaste()" disabled>📥 Paste (اختيار مكان اللصق)</button>
+  </div>
+
+  <!-- مدخل مخفي لاختيار ملفات الشبكة والنظام -->
+  <input type="file" id="fallbackFileInput" style="display: none;" onchange="handleFallbackFile(event)">
+
+  <div class="file-list" id="fileList">
+    <div style="padding: 40px; text-align: center; color: #888;">استخدم الأزرار بالأعلى لفتح الملفات من الجهاز، الشبكة، أو Google Drive</div>
+  </div>
+
+  <div class="panel">
+    <h3>أدوات التقسيم والدمج</h3>
+    <label style="font-size: 14px; color: #ccc;">حدد حجم التقسيم للملف:</label>
+    <div class="size-group">
+      <input type="number" id="chunkSize" value="500" min="0.000001" step="any" placeholder="أدخل الحجم">
+      <select id="unitSelect">
+        <option value="bit">بت (Bit)</option>
+        <option value="B">بايت (Byte)</option>
+        <option value="KB">كيلوبايت (KB)</option>
+        <option value="MB" selected>ميجابايت (MB)</option>
+        <option value="GB">جيجابايت (GB)</option>
+        <option value="TB">تيرا بايت (TB)</option>
+      </select>
     </div>
+    <div style="display: flex; gap: 12px; flex-wrap: wrap;">
+      <button class="btn btn-action" style="flex: 1; min-width: 180px; justify-content: center;" onclick="splitSelectedFile()">تقسيم الملف</button>
+      <button class="btn btn-action" style="flex: 1; min-width: 180px; justify-content: center;" onclick="mergeSelectedFiles()">دمج الأجزاء</button>
+    </div>
+    <div id="statusText" class="status"></div>
+  </div>
 </div>
 
 <script>
-    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  const CLIENT_ID = '304831987723-5g9mvugqaoi8uhg6vofrjqqm77u48onh.apps.googleusercontent.com';
+  let accessToken = null;
+  let storedFileToCopy = null;
 
-    // خريطة الترددات الصوتيّة للأرقام من 1 لـ 7 (Do Re Mi Fa Sol La Si)
-    const notes = {
-        '1': 261.63, // Do
-        '2': 293.66, // Re
-        '3': 329.63, // Mi
-        '4': 349.23, // Fa
-        '5': 392.00, // Sol
-        '6': 440.00, // La
-        '7': 493.88  // Si
-    };
+  function showStatus(text) {
+    const statusEl = document.getElementById('statusText');
+    statusEl.innerText = text;
+    statusEl.classList.add('show');
+  }
 
-    function playNote(num) {
-        if (!notes[num]) return;
+  // فتح ملفات الجهاز أو الشبكة
+  function openNetworkFile() {
+    document.getElementById('fallbackFileInput').click();
+  }
 
-        if (audioCtx.state === 'suspended') {
-            audioCtx.resume();
-        }
-
-        const osc = audioCtx.createOscillator();
-        const gain = audioCtx.createGain();
-
-        osc.type = 'sine';
-        osc.frequency.value = notes[num];
-
-        gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
-        gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + 0.8);
-
-        osc.connect(gain);
-        gain.connect(audioCtx.destination);
-
-        osc.start();
-        osc.stop(audioCtx.currentTime + 0.8);
-
-        // إضاءة المفتاح أثناء العزف
-        const keyEl = document.getElementById(`key-${num}`);
-        if (keyEl) {
-            keyEl.classList.add('playing');
-            setTimeout(() => keyEl.classList.remove('playing'), 300);
-        }
+  function handleFallbackFile(event) {
+    const file = event.target.files[0];
+    if (file) {
+      const fileListDiv = document.getElementById('fileList');
+      fileListDiv.innerHTML = `
+        <div class="file-item">
+          <div class="file-info">
+            <span class="file-icon">📄</span>
+            <span>${file.name} (${(file.size / (1024 * 1024)).toFixed(2)} MB)</span>
+          </div>
+          <span style="font-size: 12px; color: #81c784;">جاهز للعمليات</span>
+        </div>
+      `;
+      showStatus(`تم فتح الملف: ${file.name}`);
     }
+  }
 
-    // عزف سلسلة الأرقام ورا بعض بالترتيب
-    function playSequence() {
-        const input = document.getElementById('notesInput').value;
-        const numbers = input.replace(/[^1-7]/g, '').split(''); // استخراج الأرقام فقط من 1 إلى 7
+  // ربط واستعراض Google Drive باستعمال Picker API
+  function connectGoogleDrive() {
+    const client = google.accounts.oauth2.initTokenClient({
+      client_id: CLIENT_ID,
+      scope: 'https://www.googleapis.com/auth/drive.readonly',
+      callback: (response) => {
+        if (response.access_token) {
+          accessToken = response.access_token;
+          gapi.load('picker', createPicker);
+        }
+      },
+    });
+    client.requestAccessToken();
+  }
 
-        numbers.forEach((num, index) => {
-            setTimeout(() => {
-                playNote(num);
-            }, index * 400); // الفارق الزمني بين كل نغمة والتانية (400 مللي ثانية)
-        });
+  function createPicker() {
+    if (!accessToken) return;
+    const view = new google.picker.View(google.picker.ViewId.DOCS);
+    view.setMimeTypes("*/*");
+
+    const picker = new google.picker.PickerBuilder()
+      .addView(view)
+      .setOAuthToken(accessToken)
+      .setCallback(pickerCallback)
+      .build();
+    picker.setVisible(true);
+  }
+
+  function pickerCallback(data) {
+    if (data.action === google.picker.Action.PICKED) {
+      const doc = data.docs[0];
+      const fileListDiv = document.getElementById('fileList');
+      fileListDiv.innerHTML = `
+        <div class="file-item">
+          <div class="file-info">
+            <span class="file-icon">☁️</span>
+            <span>${doc.name}</span>
+          </div>
+          <span style="font-size: 12px; color: #64b5f6;">Google Drive File</span>
+        </div>
+      `;
+      showStatus(`تم اختيار الملف من Google Drive: ${doc.name}`);
     }
+  }
+
+  async function pickFileToCopy() {
+    try {
+      [storedFileToCopy] = await window.showOpenFilePicker();
+      if (storedFileToCopy) {
+        document.getElementById('pasteBtn').disabled = false;
+        showStatus(`تم نسخ الملف: ${storedFileToCopy.name}. اضغطي Paste لتحديد المجلد المستهدف.`);
+      }
+    } catch (err) {
+      document.getElementById('fallbackFileInput').click();
+    }
+  }
+
+  async function pickFolderAndPaste() {
+    if (!storedFileToCopy) return;
+    try {
+      const destinationDirHandle = await window.showDirectoryPicker();
+      if (destinationDirHandle) {
+        const file = await storedFileToCopy.getFile();
+        const newFileHandle = await destinationDirHandle.getFileHandle(`copy_${file.name}`, { create: true });
+        const writable = await newFileHandle.createWritable();
+        await writable.write(file);
+        await writable.close();
+        
+        showStatus(`تم لصق الملف بنجاح باسم: copy_${file.name}`);
+      }
+    } catch (err) {
+      showStatus("تعذر الوصول إلى المجلد المحدد للحفظ.");
+    }
+  }
+
+  async function splitSelectedFile() {
+    try {
+      const [fileHandle] = await window.showOpenFilePicker();
+      const file = await fileHandle.getFile();
+      const destinationDirHandle = await window.showDirectoryPicker();
+      
+      const sizeValue = parseFloat(document.getElementById('chunkSize').value);
+      const unit = document.getElementById('unitSelect').value;
+
+      let chunkSizeInBytes = sizeValue;
+      if (unit === 'bit') chunkSizeInBytes = sizeValue / 8;
+      else if (unit === 'B') chunkSizeInBytes = sizeValue;
+      else if (unit === 'KB') chunkSizeInBytes = sizeValue * 1024;
+      else if (unit === 'MB') chunkSizeInBytes = sizeValue * 1024 * 1024;
+      else if (unit === 'GB') chunkSizeInBytes = sizeValue * 1024 * 1024 * 1024;
+      else if (unit === 'TB') chunkSizeInBytes = sizeValue * 1024 * 1024 * 1024 * 1024;
+
+      let chunkOffset = 0;
+      let partNum = 1;
+
+      showStatus("جاري تقسيم الملف وحفظ الأجزاء...");
+
+      while (chunkOffset < file.size) {
+        const chunk = file.slice(chunkOffset, chunkOffset + chunkSizeInBytes);
+        const partName = `${file.name}.part${String(partNum).padStart(3, '0')}`;
+        
+        const partHandle = await destinationDirHandle.getFileHandle(partName, { create: true });
+        const writable = await partHandle.createWritable();
+        await writable.write(chunk);
+        await writable.close();
+
+        chunkOffset += chunkSizeInBytes;
+        partNum++;
+      }
+
+      showStatus(`تم تقسيم الملف بنجاح إلى ${partNum - 1} أجزاء!`);
+    } catch (err) {
+      console.log('تم إلغاء عملية التقسيم');
+    }
+  }
+
+  async function mergeSelectedFiles() {
+    try {
+      const currentDirHandle = await window.showDirectoryPicker();
+      const fileEntries = [];
+      for await (const entry of currentDirHandle.values()) {
+        fileEntries.push(entry);
+      }
+
+      const partEntries = fileEntries.filter(e => e.kind === 'file' && /\.part\d+$/i.test(e.name));
+      if (!partEntries.length) return alert("لم يتم العثور على أجزاء (.part) في المجلد المحدد!");
+
+      partEntries.sort((a, b) => a.name.localeCompare(b.name));
+      showStatus("جاري دمج الأجزاء...");
+
+      let originalName = partEntries[0].name.replace(/\.part\d+$/i, '');
+      const mergedHandle = await currentDirHandle.getFileHandle(`merged_${originalName}`, { create: true });
+      const writable = await mergedHandle.createWritable();
+
+      for (const entry of partEntries) {
+        const file = await entry.getFile();
+        await writable.write(file);
+      }
+      await writable.close();
+
+      showStatus(`تم دمج الأجزاء بنجاح بالملف: merged_${originalName}`);
+    } catch (err) {
+      console.log('تم إلغاء عملية الدمج');
+    }
+  }
 </script>
 
 </body>
