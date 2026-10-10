@@ -387,7 +387,7 @@ function deviceFilesChosen(event) {
   status('Copied ' + files.length + ' device file(s). Now press Paste.');
 }
 
-/* PASTE: choose destination */
+/* PASTE: choose destination - options 1 and 2 */
 async function pasteAction() {
   if (!clipboard || !clipboard.files || !clipboard.files.length) {
     status('Press Copy first and choose the files you want.');
@@ -405,41 +405,46 @@ async function pasteAction() {
 
   const option = choice.trim();
 
-  if (option === '1') {
-    if (!token) {
-      status('Connect Google Drive first.');
-      return;
-    }
-
-    if (!confirm(
-      'Paste ' + clipboard.files.length +
-      ' file(s) into the current Google Drive folder?'
-    )) return;
-
-    try {
-      if (clipboard.source === 'drive') {
-        await copyDriveToDrive(clipboard.files);
-      } else {
-        await uploadDeviceFiles(clipboard.files);
+  switch (option) {
+    case '1': {
+      if (!token) {
+        status('Connect Google Drive first.');
+        return;
       }
-    } catch (error) {
-      status(error.message || 'Copy to Google Drive failed.');
-    }
-    return;
-  }
 
-  if (option === '2') {
-    try {
-      await saveFilesToDevice(clipboard.files, clipboard.source);
-    } catch (error) {
-      if (error.name !== 'AbortError') {
-        status(error.message || 'Saving to device failed.');
+      if (!confirm(
+        'Paste ' + clipboard.files.length +
+        ' file(s) into the current Google Drive folder?'
+      )) return;
+
+      try {
+        if (clipboard.source === 'drive') {
+          await copyDriveToDrive(clipboard.files);
+        } else if (clipboard.source === 'device') {
+          await uploadDeviceFiles(clipboard.files);
+        } else {
+          status('Unknown copy source.');
+        }
+      } catch (error) {
+        status(error.message || 'Copy to Google Drive failed.');
       }
+      break;
     }
-    return;
-  }
 
-  status('Invalid choice. Enter 1 or 2.');
+    case '2': {
+      try {
+        await saveFilesToDevice(clipboard.files, clipboard.source);
+      } catch (error) {
+        if (error.name !== 'AbortError') {
+          status(error.message || 'Saving to device failed.');
+        }
+      }
+      break;
+    }
+
+    default:
+      status('Invalid choice. Enter 1 or 2.');
+  }
 }
 
 async function copyDriveToDrive(files) {
