@@ -7,96 +7,168 @@
 <meta name="google-site-verification" content="lxdtz7JV0LDwpSlJVzduXfk_hhG8mGzV7D1qU0NuXWM">
 <title>Mariam's Splitter</title>
 <script src="https://accounts.google.com/gsi/client" async defer></script>
+
 <style>
-*{box-sizing:border-box}
-body{margin:0;padding:18px;background:#121212;color:#eee;font-family:Arial,sans-serif}
-main{max-width:1000px;margin:auto;background:#1e1e1e;padding:22px;border-radius:14px}
-header,.toolbar,.actions{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
-header{justify-content:space-between;border-bottom:1px solid #444;padding-bottom:15px}
-h1{color:#ffb74d;margin:0}
-h2{font-size:18px;color:#64b5f6}
-button,select,input{font:inherit;border-radius:7px;padding:10px}
-button{cursor:pointer;border:0;background:#ffb74d;color:#151515;font-weight:bold}
-button.secondary{background:#333;color:white;border:1px solid #555}
-button:disabled{opacity:.45;cursor:not-allowed}
-input,select{background:#292929;color:white;border:1px solid #555;max-width:100%}
-input[type=checkbox]{width:18px;height:18px}
-section{margin-top:20px;padding:16px;background:#252525;border:1px solid #393939;border-radius:10px}
-.toolbar{margin:14px 0}
-#status{padding:12px;margin-top:12px;border-radius:7px;background:#193020;color:#a5e6b1;overflow-wrap:anywhere}
-#crumb{color:#aaa;overflow-wrap:anywhere;margin:12px 0}
-#files{min-height:100px}
-.file{display:flex;align-items:center;gap:10px;padding:12px 5px;border-bottom:1px solid #393939}
-.file-name{flex:1;overflow-wrap:anywhere;cursor:pointer}
-.file small{color:#aaa}
-.grid{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}
-.grid input{width:150px}
-.muted{color:#aaa;font-size:13px;line-height:1.5}
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  padding: 18px;
+  background: #121212;
+  color: #eee;
+  font-family: Arial, sans-serif;
+}
+main {
+  max-width: 1000px;
+  margin: auto;
+  background: #1e1e1e;
+  padding: 22px;
+  border-radius: 14px;
+}
+header, .toolbar, .actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+header {
+  justify-content: space-between;
+  border-bottom: 1px solid #444;
+  padding-bottom: 15px;
+}
+h1 { color: #ffb74d; margin: 0; }
+h2 { font-size: 18px; color: #64b5f6; }
+button, select, input {
+  font: inherit;
+  border-radius: 7px;
+  padding: 10px;
+}
+button {
+  cursor: pointer;
+  border: 0;
+  background: #ffb74d;
+  color: #151515;
+  font-weight: bold;
+}
+button.secondary {
+  background: #333;
+  color: white;
+  border: 1px solid #555;
+}
+button:disabled { opacity: .45; cursor: not-allowed; }
+input, select {
+  background: #292929;
+  color: white;
+  border: 1px solid #555;
+  max-width: 100%;
+}
+input[type=checkbox] { width: 18px; height: 18px; }
+section {
+  margin-top: 20px;
+  padding: 16px;
+  background: #252525;
+  border: 1px solid #393939;
+  border-radius: 10px;
+}
+.toolbar { margin: 14px 0; }
+#status {
+  padding: 12px;
+  margin-top: 12px;
+  border-radius: 7px;
+  background: #193020;
+  color: #a5e6b1;
+  overflow-wrap: anywhere;
+}
+#crumb { color: #aaa; overflow-wrap: anywhere; margin: 12px 0; }
+#files { min-height: 100px; }
+.file {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 5px;
+  border-bottom: 1px solid #393939;
+}
+.file-name { flex: 1; overflow-wrap: anywhere; cursor: pointer; }
+.file small { color: #aaa; }
+.grid { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 12px; }
+.grid input { width: 150px; }
+.muted { color: #aaa; font-size: 13px; line-height: 1.5; }
 </style>
 </head>
+
 <body>
 <main>
-<header>
-  <h1>Mariam's Splitter 📁</h1>
-  <button id="connect" onclick="connectDrive()">Connect Google Drive</button>
-</header>
+  <header>
+    <h1>Mariam's Splitter 📁</h1>
+    <button id="connect" onclick="connectDrive()">Connect Google Drive</button>
+  </header>
 
-<div id="status" role="status">Connect Google Drive to manage your cloud files.</div>
+  <div id="status" role="status">Connect Google Drive to manage your cloud files.</div>
 
-<section>
-<h2>Google Drive</h2>
-<div class="toolbar">
-  <button class="secondary" onclick="goBack()">← Back</button>
-  <button class="secondary" onclick="loadFolder()">Refresh</button>
-  <button class="secondary" onclick="createFolder()">+ New folder</button>
-</div>
+  <section>
+    <h2>Google Drive</h2>
 
-<div id="crumb">My Drive</div>
+    <div class="toolbar">
+      <button class="secondary" onclick="goBack()">← Back</button>
+      <button class="secondary" onclick="loadFolder()">Refresh</button>
+      <button class="secondary" onclick="createFolder()">+ New folder</button>
+    </div>
 
-<div class="toolbar">
-  <button onclick="copyAction()">Copy</button>
-  <button onclick="pasteAction()">Paste</button>
-  <button onclick="moveSelected()">Move selected here</button>
-  <button class="secondary" onclick="clearSelection()">Clear selection</button>
-</div>
+    <div id="crumb">My Drive</div>
 
-<div id="files">Connect your Google account to display files.</div>
+    <div class="toolbar">
+      <button onclick="copyAction()">Copy</button>
+      <button onclick="pasteAction()">Paste</button>
+      <button onclick="moveSelected()">Move selected here</button>
+      <button class="secondary" onclick="clearSelection()">Clear selection</button>
+    </div>
 
-<p class="muted">
-Select files using the checkboxes. Copy can select files from Google Drive or your device.
-Paste lets you choose Google Drive or your device as the destination.
-</p>
+    <div id="files">Connect your Google account to display files.</div>
 
-<input id="deviceInput" type="file" multiple hidden onchange="deviceFilesChosen(event)">
-</section>
+    <p class="muted">
+      Select files using the checkboxes. Copy lets you choose files from
+      Google Drive or your device. Paste lets you choose Google Drive or
+      your device as the destination.
+    </p>
 
-<section>
-<h2>Split a local file</h2>
-<p class="muted">Choose a file from your device and save its parts into a local folder. The parts are not automatically uploaded to Drive.</p>
-<div class="grid">
-  <input id="partSize" type="number" min="0.000001" step="any" value="500">
-  <select id="partUnit">
-    <option value="bit">Bits</option>
-    <option value="B">Bytes</option>
-    <option value="KB">KB</option>
-    <option value="MB" selected>MB</option>
-    <option value="GB">GB</option>
-    <option value="TB">TB</option>
-  </select>
-  <button onclick="splitLocalFile()">Choose file & split</button>
-</div>
-</section>
+    <input id="deviceInput" type="file" multiple hidden onchange="deviceFilesChosen(event)">
+  </section>
 
-<section>
-<h2>Merge local parts</h2>
-<p class="muted">Choose the local folder containing files named like filename.ext.part001, filename.ext.part002, and so on.</p>
-<button onclick="mergeLocalParts()">Choose folder & merge</button>
-</section>
+  <section>
+    <h2>Split a local file</h2>
+    <p class="muted">
+      Choose a file from your device and save its parts into a local folder.
+      The parts are not automatically uploaded to Drive.
+    </p>
+
+    <div class="grid">
+      <input id="partSize" type="number" min="0.000001" step="any" value="500">
+
+      <select id="partUnit">
+        <option value="bit">Bits</option>
+        <option value="B">Bytes</option>
+        <option value="KB">KB</option>
+        <option value="MB" selected>MB</option>
+        <option value="GB">GB</option>
+        <option value="TB">TB</option>
+      </select>
+
+      <button onclick="splitLocalFile()">Choose file &amp; split</button>
+    </div>
+  </section>
+
+  <section>
+    <h2>Merge local parts</h2>
+    <p class="muted">
+      Choose the local folder containing files named like
+      filename.ext.part001, filename.ext.part002, and so on.
+    </p>
+    <button onclick="mergeLocalParts()">Choose folder &amp; merge</button>
+  </section>
 </main>
 
 <script>
 const CLIENT_ID =
-'304831987723-5g9mvugqaoi8uhg6vofrjqqm77u48onh.apps.googleusercontent.com';
+  '304831987723-5g9mvugqaoi8uhg6vofrjqqm77u48onh.apps.googleusercontent.com';
 
 const DRIVE_SCOPE = 'https://www.googleapis.com/auth/drive';
 
@@ -106,7 +178,6 @@ let folderStack = [];
 let selected = new Map();
 let clipboard = null;
 let currentFiles = [];
-let choosingDeviceFiles = false;
 
 function status(message) {
   document.getElementById('status').textContent = message;
@@ -159,7 +230,9 @@ async function driveRequest(path, options = {}) {
   }
 
   if (response.status === 204) return null;
-  return response.json();
+
+  const text = await response.text();
+  return text ? JSON.parse(text) : null;
 }
 
 function queryValue(value) {
@@ -191,6 +264,7 @@ async function loadFolder() {
 
     const crumbs = ['My Drive', ...folderStack.map(x => x.name)];
     document.getElementById('crumb').textContent = crumbs.join(' / ');
+
     status('Loaded ' + currentFiles.length + ' items.');
   } catch (error) {
     status(error.message);
@@ -228,7 +302,7 @@ function renderFiles() {
 
     if (isFolder) {
       name.onclick = () => {
-        folderStack.push({id: currentFolder, name: file.name});
+        folderStack.push({ id: currentFolder, name: file.name });
         currentFolder = file.id;
         loadFolder();
       };
@@ -260,13 +334,20 @@ function clearSelection() {
   status('Selection cleared.');
 }
 
-/* COPY: choose Google Drive or device */
+/* COPY: choose source */
 function copyAction() {
   const choice = prompt(
-    'Copy files FROM:\n1 - Selected Google Drive files\n2 - Files on this device\n\nEnter 1 or 2:'
+    'Copy files FROM:\n' +
+    '1 - Selected Google Drive files\n' +
+    '2 - Files on this device\n\n' +
+    'Enter 1 or 2:'
   );
 
-  if (choice === '1') {
+  if (choice === null) return;
+
+  const option = choice.trim();
+
+  if (option === '1') {
     if (!token) {
       status('Connect Google Drive first.');
       return;
@@ -277,24 +358,23 @@ function copyAction() {
     );
 
     if (!files.length) {
-      status('Select one or more files in Google Drive first.');
+      status('Select one or more Google Drive files using their checkboxes first.');
       return;
     }
 
-    clipboard = {source: 'drive', files};
-    status('Copied ' + files.length + ' Drive file(s). Now press Paste.');
+    clipboard = { source: 'drive', files };
+    status('Copied ' + files.length + ' Google Drive file(s). Now press Paste.');
     return;
   }
 
-  if (choice === '2') {
-    choosingDeviceFiles = true;
+  if (option === '2') {
     const input = document.getElementById('deviceInput');
     input.value = '';
     input.click();
     return;
   }
 
-  if (choice !== null) status('Choose 1 or 2.');
+  status('Invalid choice. Enter 1 or 2.');
 }
 
 function deviceFilesChosen(event) {
@@ -303,11 +383,11 @@ function deviceFilesChosen(event) {
 
   if (!files.length) return;
 
-  clipboard = {source: 'device', files};
+  clipboard = { source: 'device', files };
   status('Copied ' + files.length + ' device file(s). Now press Paste.');
 }
 
-/* PASTE: choose Google Drive or device */
+/* PASTE: choose destination */
 async function pasteAction() {
   if (!clipboard || !clipboard.files || !clipboard.files.length) {
     status('Press Copy first and choose the files you want.');
@@ -315,18 +395,26 @@ async function pasteAction() {
   }
 
   const choice = prompt(
-    'Paste files TO:\n1 - Current Google Drive folder\n2 - A folder on this device\n\nEnter 1 or 2:'
+    'Paste files TO:\n' +
+    '1 - Current Google Drive folder\n' +
+    '2 - A folder on this device\n\n' +
+    'Enter 1 or 2:'
   );
 
-  if (choice === '1') {
+  if (choice === null) return;
+
+  const option = choice.trim();
+
+  if (option === '1') {
     if (!token) {
       status('Connect Google Drive first.');
       return;
     }
 
-    if (!confirm('Paste ' + clipboard.files.length + ' file(s) into this Google Drive folder?')) {
-      return;
-    }
+    if (!confirm(
+      'Paste ' + clipboard.files.length +
+      ' file(s) into the current Google Drive folder?'
+    )) return;
 
     try {
       if (clipboard.source === 'drive') {
@@ -335,21 +423,23 @@ async function pasteAction() {
         await uploadDeviceFiles(clipboard.files);
       }
     } catch (error) {
-      status(error.message);
+      status(error.message || 'Copy to Google Drive failed.');
     }
     return;
   }
 
-  if (choice === '2') {
+  if (option === '2') {
     try {
       await saveFilesToDevice(clipboard.files, clipboard.source);
     } catch (error) {
-      if (error.name !== 'AbortError') status(error.message);
+      if (error.name !== 'AbortError') {
+        status(error.message || 'Saving to device failed.');
+      }
     }
     return;
   }
 
-  if (choice !== null) status('Choose 1 or 2.');
+  status('Invalid choice. Enter 1 or 2.');
 }
 
 async function copyDriveToDrive(files) {
@@ -358,7 +448,7 @@ async function copyDriveToDrive(files) {
   for (const file of files) {
     await driveRequest('/files/' + encodeURIComponent(file.id) + '/copy', {
       method: 'POST',
-      headers: {'Content-Type': 'application/json'},
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         name: file.name,
         parents: [currentFolder]
@@ -376,6 +466,7 @@ async function copyDriveToDrive(files) {
 async function uploadDeviceFiles(files) {
   for (let i = 0; i < files.length; i++) {
     const file = files[i];
+
     status('Uploading to Drive: ' + (i + 1) + ' of ' + files.length + ': ' + file.name);
 
     const start = await fetch(
@@ -409,7 +500,7 @@ async function uploadDeviceFiles(files) {
 
     const finish = await fetch(uploadUrl, {
       method: 'PUT',
-      headers: {'Content-Type': file.type || 'application/octet-stream'},
+      headers: { 'Content-Type': file.type || 'application/octet-stream' },
       body: file
     });
 
@@ -420,7 +511,6 @@ async function uploadDeviceFiles(files) {
   await loadFolder();
 }
 
-/* Save Drive or device files to a folder on the device */
 async function saveFilesToDevice(files, source) {
   if (window.showDirectoryPicker) {
     const folder = await window.showDirectoryPicker();
@@ -435,7 +525,7 @@ async function saveFilesToDevice(files, source) {
         blob = await downloadDriveFile(item);
       }
 
-      const handle = await folder.getFileHandle(item.name, {create: true});
+      const handle = await folder.getFileHandle(item.name, { create: true });
       const writable = await handle.createWritable();
       await writable.write(blob);
       await writable.close();
@@ -468,14 +558,14 @@ async function saveFilesToDevice(files, source) {
 async function downloadDriveFile(file) {
   if (file.mimeType && file.mimeType.startsWith('application/vnd.google-apps.')) {
     throw new Error(
-      'This is a Google Docs/Sheets/Slides file. Downloading native Google files needs an export format.'
+      'This is a Google Docs/Sheets/Slides file. Native Google files need to be exported before downloading.'
     );
   }
 
   const response = await fetch(
     'https://www.googleapis.com/drive/v3/files/' +
     encodeURIComponent(file.id) + '?alt=media',
-    {headers: {Authorization: 'Bearer ' + token}}
+    { headers: { Authorization: 'Bearer ' + token } }
   );
 
   if (response.status === 401) {
@@ -523,14 +613,14 @@ async function moveSelected() {
       const parents = file.parents || [];
       if (parents.includes(currentFolder)) continue;
 
-      const params = new URLSearchParams({addParents: currentFolder});
+      const params = new URLSearchParams({ addParents: currentFolder });
       if (parents.length) params.set('removeParents', parents.join(','));
 
       await driveRequest(
         '/files/' + encodeURIComponent(file.id) + '?' + params.toString(),
         {
           method: 'PATCH',
-          headers: {'Content-Type': 'application/json'},
+          headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({})
         }
       );
@@ -555,7 +645,7 @@ async function createFolder() {
   try {
     await driveRequest('/files', {
       method: 'POST',
-      headers: {'Content-Type': 'application/json'},
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         name: name.trim(),
         mimeType: 'application/vnd.google-apps.folder',
@@ -599,12 +689,13 @@ function bytesFromSize(value, unit) {
 async function splitLocalFile() {
   try {
     if (!window.showOpenFilePicker || !window.showDirectoryPicker) {
-      status('This feature requires a supported browser such as desktop Microsoft Edge or Chrome.');
+      status('This feature requires a supported browser such as desktop Chrome or Edge.');
       return;
     }
 
     const [handle] = await window.showOpenFilePicker();
     const file = await handle.getFile();
+
     const value = Number(document.getElementById('partSize').value);
     const unit = document.getElementById('partUnit').value;
     const chunkSize = bytesFromSize(value, unit);
@@ -621,9 +712,9 @@ async function splitLocalFile() {
       const start = i * chunkSize;
       const end = Math.min(start + chunkSize, file.size);
       const partName = file.name + '.part' + String(i + 1).padStart(3, '0');
-      const partHandle = await destination.getFileHandle(partName, {create: true});
-      const writable = await partHandle.createWritable();
 
+      const partHandle = await destination.getFileHandle(partName, { create: true });
+      const writable = await partHandle.createWritable();
       await writable.write(file.slice(start, end));
       await writable.close();
 
@@ -653,8 +744,8 @@ async function mergeLocalParts() {
     }
 
     entries.sort((a, b) => {
-      const na = Number((a.name.match(/\.part(\d+)$/i) || [,'0'])[1]);
-      const nb = Number((b.name.match(/\.part(\d+)$/i) || [,'0'])[1]);
+      const na = Number((a.name.match(/\.part(\d+)$/i) || ['', '0'])[1]);
+      const nb = Number((b.name.match(/\.part(\d+)$/i) || ['', '0'])[1]);
       return na - nb;
     });
 
@@ -665,7 +756,7 @@ async function mergeLocalParts() {
 
     const baseName = entries[0].name.replace(/\.part\d+$/i, '');
     const outputName = 'merged_' + baseName;
-    const outputHandle = await folder.getFileHandle(outputName, {create: true});
+    const outputHandle = await folder.getFileHandle(outputName, { create: true });
     const writable = await outputHandle.createWritable();
 
     for (let i = 0; i < entries.length; i++) {
