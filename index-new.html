@@ -347,25 +347,32 @@ hr { border:0; border-top:1px solid var(--line); margin:18px 0; }
     }
   }
 
-  async function openFolder(item) {
-    try {
-      if (state.source === "drive") {
-        state.drive.stack.push({
-          id:state.drive.folderId,
-          path:state.drive.path
-        });
-        state.drive.folderId = item.id;
-        state.drive.path += " / " + item.name;
-        await refreshDrive();
-      } else {
-        const dir = await item.handle.getDirectoryHandle(item.name);
-        state[state.source].dir = dir;
-        await refreshLocal(state.source);
-      }
-    } catch (error) {
-      status("Could not open folder: " + error.message);
+async function openFolder(item) {
+  try {
+    if (state.source === "drive") {
+      state.drive.stack.push({
+        id: state.drive.folderId,
+        path: state.drive.path
+      });
+
+      state.drive.folderId = item.id;
+      state.drive.path += " / " + item.name;
+      await refreshDrive();
+      return;
     }
+
+    if (item.kind !== "folder" || !item.handle) {
+      return;
+    }
+
+    // The item's handle already points to the selected subfolder.
+    state[state.source].dir = item.handle;
+    await refreshLocal(state.source);
+  } catch (error) {
+    status("Could not open folder: " + error.message);
   }
+}
+
 
   function updateClipboard() {
     $("clipboardSummary").textContent = state.clipboard.length
