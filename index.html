@@ -92,6 +92,17 @@ section {
 .grid { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 12px; }
 .grid input { width: 150px; }
 .muted { color: #aaa; font-size: 13px; line-height: 1.5; }
+
+#pastePanel {
+  display: none;
+  margin: 12px 0;
+  padding: 14px;
+  background: #303030;
+  border: 1px solid #555;
+  border-radius: 9px;
+}
+#pastePanel select { min-width: 260px; }
+#pastePanel .toolbar { margin-bottom: 0; }
 </style>
 </head>
 
@@ -120,6 +131,22 @@ section {
       <button onclick="pasteAction()">Paste</button>
       <button onclick="moveSelected()">Move selected here</button>
       <button class="secondary" onclick="clearSelection()">Clear selection</button>
+    </div>
+
+    <div id="pastePanel">
+      <strong>Paste files TO:</strong>
+      <div class="toolbar">
+        <select id="pasteDestination">
+          <option value="1">1 - Current Google Drive folder</option>
+          <option value="2">2 - A folder on this device</option>
+        </select>
+        <button onclick="executePaste()">Continue Paste</button>
+        <button class="secondary" onclick="cancelPaste()">Cancel</button>
+      </div>
+      <p class="muted">
+        Choose the destination, then press Continue Paste.
+        If you choose your device, the folder picker will open from that button.
+      </p>
     </div>
 
     <div id="files">Connect your Google account to display files.</div>
@@ -387,63 +414,96 @@ function deviceFilesChosen(event) {
   status('Copied ' + files.length + ' device file(s). Now press Paste.');
 }
 
-/* PASTE: choose destination - options 1 and 2 */
-async function pasteAction() {
+/* PASTE: show the destination selector */
+function pasteAction() {
   if (!clipboard || !clipboard.files || !clipboard.files.length) {
     status('Press Copy first and choose the files you want.');
     return;
   }
 
-  const choice = prompt(
-    'Paste files TO:\n' +
-    '1 - Current Google Drive folder\n' +
-    '2 - A folder on this device\n\n' +
-    'Enter 1 or 2:'
-  );
+  document.getElementById('pastePanel').style.display = 'block';
+  status('Choose Paste destination: 1 for Google Drive or 2 for your device.');
+}
 
-  if (choice === null) return;
+function cancelPaste() {
+  document.getElementById('pastePanel').style.display = 'none';
+}
 
-  const option = choice.trim();
+/*
+ * This function is called directly by the Continue Paste button.
+ * For device destination, showDirectoryPicker() is called BEFORE any await,
+ * preserving the browser's user-gesture permission.
+ */
+async function executePaste() {
+  if (!clipboard || !clipboard.files || !clipboard.files.length) {
+    status('Press Copy first and choose the files you want.');
+    cancelPaste();
+    return;
+  }
 
-  switch (option) {
-    case '1': {
-      if (!token) {
-        status('Connect Google Drive first.');
+  const destination = document.getElementById('pasteDestination').value;
+  const files = [...clipboard.files];
+  const source = clipboard.source;
+
+  if (destination === '1') {
+    if (!token) {
+      status('Connect Google Drive first.');
+      return;
+    }
+
+    if (!confirm(
+      'Paste ' + files.length +
+      ' file(s) into the current Google Drive folder?'
+    )) return;
+
+    cancelPaste();
+
+    try {
+      if (source === 'drive') {
+        await copyDriveToDrive(files);
+      } else if (source === 'device') {
+        await uploadDeviceFiles(files);
+      } else {
+        status('Unknown copy source.');
+      }
+    } catch (error) {
+      status(error.message || 'Copy to Google Drive failed.');
+    }
+
+    return;
+  }
+
+  if (destination === '2') {
+    /*
+     * Call the picker immediately from this button's click handler.
+     * Do not move this call after an await.
+     */
+    let folderPromise = null;
+
+    if (window.showDirectoryPicker) {
+      try {
+        folderPromise = window.showDirectoryPicker({ mode: 'readwrite' });
+      } catch (error) {
+        status(error.message || 'Could not open the folder picker.');
         return;
       }
-
-      if (!confirm(
-        'Paste ' + clipboard.files.length +
-        ' file(s) into the current Google Drive folder?'
-      )) return;
-
-      try {
-        if (clipboard.source === 'drive') {
-          await copyDriveToDrive(clipboard.files);
-        } else if (clipboard.source === 'device') {
-          await uploadDeviceFiles(clipboard.files);
-        } else {
-          status('Unknown copy source.');
-        }
-      } catch (error) {
-        status(error.message || 'Copy to Google Drive failed.');
-      }
-      break;
     }
 
-    case '2': {
-      try {
-        await saveFilesToDevice(clipboard.files, clipboard.source);
-      } catch (error) {
-        if (error.name !== 'AbortError') {
-          status(error.message || 'Saving to device failed.');
-        }
-      }
-      break;
-    }
+    cancelPaste();
 
-    default:
-      status('Invalid choice. Enter 1 or 2.');
+    try {
+      let folder = null;
+
+      if (folderPromise) {
+        folder = await folderPromise;
+      }
+
+      await saveFilesToDevice(files, source, folder);
+    } catch (error) {
+      if (error.name !== 'AbortError') {
+        status(error.message || 'Saving to device failed.');
+      }
+    }
   }
 }
 
@@ -516,10 +576,13 @@ async function uploadDeviceFiles(files) {
   await loadFolder();
 }
 
-async function saveFilesToDevice(files, source) {
-  if (window.showDirectoryPicker) {
-    const folder = await window.showDirectoryPicker();
-
+async function saveFilesToDevice(files, source, folder = null) {
+  /*
+   * A folder is passed in from executePaste(), where the picker was opened
+   * directly by the Continue Paste button. This function does not open
+   * the picker again after an await.
+   */
+  if (folder) {
     for (let i = 0; i < files.length; i++) {
       const item = files[i];
       let blob;
@@ -542,6 +605,10 @@ async function saveFilesToDevice(files, source) {
     return;
   }
 
+  /*
+   * Fallback for browsers without showDirectoryPicker().
+   * Files will be saved through the browser's normal Downloads behavior.
+   */
   if (source === 'drive') {
     for (let i = 0; i < files.length; i++) {
       const blob = await downloadDriveFile(files[i]);
