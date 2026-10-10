@@ -1,266 +1,519 @@
+```html
 <!DOCTYPE html>
-<html lang="ar" dir="rtl">
+<html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ZArchiver Web Explorer 📁</title>
-  <!-- مكتبات تسجيل الدخول واستعراض جوجل درايف -->
-  <script src="https://accounts.google.com/gsi/client" async defer></script>
-  <script src="https://apis.google.com/js/api.js" async defer></script>
-  <style>
-    * { box-sizing: border-box; font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
-    body { background-color: #121212; color: #e0e0e0; margin: 0; padding: 20px; }
-    .container { max-width: 950px; margin: 0 auto; background: #1e1e1e; border-radius: 12px; padding: 25px; box-shadow: 0 8px 24px rgba(0,0,0,0.6); border: 1px solid #2a2a2a; }
-    header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #333; padding-bottom: 18px; margin-bottom: 20px; flex-wrap: wrap; gap: 10px; }
-    h1 { color: #ffb74d; margin: 0; font-size: 24px; display: flex; align-items: center; gap: 10px; }
-    .btn { background: #2d2d2d; color: #fff; border: 1px solid #444; padding: 10px 18px; border-radius: 8px; cursor: pointer; font-size: 14px; font-weight: 500; transition: all 0.2s ease; display: inline-flex; align-items: center; gap: 8px; }
-    .btn:hover { background: #3d3d3d; border-color: #666; }
-    .btn:disabled { opacity: 0.4; cursor: not-allowed; }
-    .btn-drive { background: #1a73e8; border: none; font-weight: bold; }
-    .btn-drive:hover { background: #1557b0; }
-    .btn-action { background: #ffb74d; color: #121212; border: none; font-weight: bold; }
-    .btn-action:hover { background: #ffa726; }
-    
-    .explorer-bar { display: flex; gap: 12px; margin-bottom: 15px; flex-wrap: wrap; }
-    .file-list { background: #262626; border-radius: 10px; border: 1px solid #333; min-height: 280px; max-height: 420px; overflow-y: auto; padding: 10px; }
-    .file-item { display: flex; justify-content: space-between; align-items: center; padding: 12px 18px; border-bottom: 1px solid #333; }
-    .file-item:last-child { border-bottom: none; }
-    .file-info { display: flex; align-items: center; gap: 12px; font-size: 15px; }
-    .file-icon { font-size: 20px; }
-    
-    .panel { background: #252525; padding: 20px; border-radius: 10px; margin-top: 20px; border: 1px solid #333; }
-    .panel h3 { margin-top: 0; color: #64b5f6; font-size: 18px; }
-    .size-group { display: flex; gap: 12px; margin: 12px 0 18px 0; }
-    .size-group input { flex: 2; padding: 10px 14px; background: #333; border: 1px solid #444; color: #fff; border-radius: 8px; font-size: 15px; }
-    .size-group select { flex: 1; padding: 10px 14px; background: #333; border: 1px solid #444; color: #fff; border-radius: 8px; font-size: 15px; }
-    .status { margin-top: 15px; font-size: 14px; color: #81c784; padding: 10px; background: #1b2e1e; border-radius: 6px; border: 1px solid #2e4d32; display: none; }
-    .status.show { display: block; }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Maria Splitter</title>
+<script src="https://accounts.google.com/gsi/client" async defer></script>
+<style>
+*{box-sizing:border-box}
+body{margin:0;padding:18px;background:#121212;color:#eee;font-family:Arial,sans-serif}
+main{max-width:1000px;margin:auto;background:#1e1e1e;padding:22px;border-radius:14px}
+header,.toolbar,.actions{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+header{justify-content:space-between;border-bottom:1px solid #444;padding-bottom:15px}
+h1{color:#ffb74d;margin:0}
+h2{font-size:18px;color:#64b5f6}
+button,select,input{font:inherit;border-radius:7px;padding:10px}
+button{cursor:pointer;border:0;background:#ffb74d;color:#151515;font-weight:bold}
+button.secondary{background:#333;color:white;border:1px solid #555}
+button:disabled{opacity:.45;cursor:not-allowed}
+input,select{background:#292929;color:white;border:1px solid #555;max-width:100%}
+input[type=checkbox]{width:18px;height:18px}
+section{margin-top:20px;padding:16px;background:#252525;border:1px solid #393939;border-radius:10px}
+.toolbar{margin:14px 0}
+#status{padding:12px;margin-top:12px;border-radius:7px;background:#193020;color:#a5e6b1;overflow-wrap:anywhere}
+#crumb{color:#aaa;overflow-wrap:anywhere;margin:12px 0}
+#files{min-height:100px}
+.file{display:flex;align-items:center;gap:10px;padding:12px 5px;border-bottom:1px solid #393939}
+.file-name{flex:1;overflow-wrap:anywhere;cursor:pointer}
+.file small{color:#aaa}
+.grid{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}
+.grid input{width:150px}
+.muted{color:#aaa;font-size:13px;line-height:1.5}
+</style>
 </head>
 <body>
+<main>
+<header>
+  <h1>Maria Splitter 📁</h1>
+  <button id="connect" onclick="connectDrive()">Connect Google Drive</button>
+</header>
 
-<div class="container">
-  <header>
-    <h1>ZArchiver Web Explorer 📁</h1>
-    <div>
-      <button class="btn btn-drive" onclick="connectGoogleDrive()">🔗 فتح Google Drive</button>
-    </div>
-  </header>
+<div id="status" role="status">Connect Google Drive to manage your cloud files.</div>
 
-  <div class="explorer-bar">
-    <button class="btn" onclick="openNetworkFile()">📂 فتح ملف (مكاني / شبكة)</button>
-    <button class="btn btn-action" onclick="pickFileToCopy()">📋 Copy (اختيار ملف للنسخ)</button>
-    <button class="btn btn-action" id="pasteBtn" onclick="pickFolderAndPaste()" disabled>📥 Paste (اختيار مكان اللصق)</button>
-  </div>
-
-  <!-- مدخل مخفي لاختيار ملفات الشبكة والنظام -->
-  <input type="file" id="fallbackFileInput" style="display: none;" onchange="handleFallbackFile(event)">
-
-  <div class="file-list" id="fileList">
-    <div style="padding: 40px; text-align: center; color: #888;">استخدم الأزرار بالأعلى لفتح الملفات من الجهاز، الشبكة، أو Google Drive</div>
-  </div>
-
-  <div class="panel">
-    <h3>أدوات التقسيم والدمج</h3>
-    <label style="font-size: 14px; color: #ccc;">حدد حجم التقسيم للملف:</label>
-    <div class="size-group">
-      <input type="number" id="chunkSize" value="500" min="0.000001" step="any" placeholder="أدخل الحجم">
-      <select id="unitSelect">
-        <option value="bit">بت (Bit)</option>
-        <option value="B">بايت (Byte)</option>
-        <option value="KB">كيلوبايت (KB)</option>
-        <option value="MB" selected>ميجابايت (MB)</option>
-        <option value="GB">جيجابايت (GB)</option>
-        <option value="TB">تيرا بايت (TB)</option>
-      </select>
-    </div>
-    <div style="display: flex; gap: 12px; flex-wrap: wrap;">
-      <button class="btn btn-action" style="flex: 1; min-width: 180px; justify-content: center;" onclick="splitSelectedFile()">تقسيم الملف</button>
-      <button class="btn btn-action" style="flex: 1; min-width: 180px; justify-content: center;" onclick="mergeSelectedFiles()">دمج الأجزاء</button>
-    </div>
-    <div id="statusText" class="status"></div>
-  </div>
+<section>
+<h2>Google Drive</h2>
+<div class="toolbar">
+  <button class="secondary" onclick="goBack()">← Back</button>
+  <button class="secondary" onclick="loadFolder()">Refresh</button>
+  <button class="secondary" onclick="createFolder()">+ New folder</button>
+  <button class="secondary" onclick="uploadFiles()">Upload files</button>
 </div>
+<div id="crumb">My Drive</div>
+<div class="toolbar">
+  <button onclick="copySelected()">Copy selected</button>
+  <button onclick="pasteHere()">Paste here</button>
+  <button onclick="moveSelected()">Move selected here</button>
+  <button class="secondary" onclick="clearSelection()">Clear selection</button>
+</div>
+<div id="files">Connect your Google account to display files.</div>
+<p class="muted">Select files using the checkboxes. Open a folder by clicking its name. Copy selected files, open the destination folder, then choose Paste here. Move selected here moves the original files.</p>
+<input id="uploadInput" type="file" multiple hidden onchange="uploadChosenFiles(event)">
+</section>
+
+<section>
+<h2>Split a local file</h2>
+<p class="muted">Choose a file from your computer and save its parts into a local folder. The parts are not automatically uploaded to Drive.</p>
+<div class="grid">
+  <input id="partSize" type="number" min="0.000001" step="any" value="500">
+  <select id="partUnit">
+    <option value="bit">Bits</option>
+    <option value="B">Bytes</option>
+    <option value="KB">KB</option>
+    <option value="MB" selected>MB</option>
+    <option value="GB">GB</option>
+    <option value="TB">TB</option>
+  </select>
+  <button onclick="splitLocalFile()">Choose file & split</button>
+</div>
+</section>
+
+<section>
+<h2>Merge local parts</h2>
+<p class="muted">Choose the local folder containing files named like filename.ext.part001, filename.ext.part002, and so on.</p>
+<button onclick="mergeLocalParts()">Choose folder & merge</button>
+</section>
+</main>
 
 <script>
-  const CLIENT_ID = '304831987723-5g9mvugqaoi8uhg6vofrjqqm77u48onh.apps.googleusercontent.com';
-  let accessToken = null;
-  let storedFileToCopy = null;
+const CLIENT_ID =
+'304831987723-5g9mvugqaoi8uhg6vofrjqqm77u48onh.apps.googleusercontent.com';
 
-  function showStatus(text) {
-    const statusEl = document.getElementById('statusText');
-    statusEl.innerText = text;
-    statusEl.classList.add('show');
+const DRIVE_SCOPE = 'https://www.googleapis.com/auth/drive';
+
+let token = null;
+let currentFolder = 'root';
+let folderStack = [];
+let selected = new Map();
+let clipboard = [];
+let currentFiles = [];
+
+function status(message) {
+  document.getElementById('status').textContent = message;
+}
+
+function escapeText(value) {
+  return String(value ?? '');
+}
+
+async function connectDrive() {
+  if (!window.google?.accounts?.oauth2) {
+    status('Google sign-in is still loading. Wait a moment and try again.');
+    return;
   }
 
-  // فتح ملفات الجهاز أو الشبكة
-  function openNetworkFile() {
-    document.getElementById('fallbackFileInput').click();
-  }
+  const client = google.accounts.oauth2.initTokenClient({
+    client_id: CLIENT_ID,
+    scope: DRIVE_SCOPE,
+    callback: async response => {
+      if (response.error || !response.access_token) {
+        status('Google sign-in failed: ' + (response.error || 'No access token'));
+        return;
+      }
 
-  function handleFallbackFile(event) {
-    const file = event.target.files[0];
-    if (file) {
-      const fileListDiv = document.getElementById('fileList');
-      fileListDiv.innerHTML = `
-        <div class="file-item">
-          <div class="file-info">
-            <span class="file-icon">📄</span>
-            <span>${file.name} (${(file.size / (1024 * 1024)).toFixed(2)} MB)</span>
-          </div>
-          <span style="font-size: 12px; color: #81c784;">جاهز للعمليات</span>
-        </div>
-      `;
-      showStatus(`تم فتح الملف: ${file.name}`);
+      token = response.access_token;
+      document.getElementById('connect').textContent = 'Reconnect Google Drive';
+      status('Connected. Loading your Drive files...');
+      await loadFolder();
     }
+  });
+
+  client.requestAccessToken();
+}
+
+async function driveRequest(path, options = {}) {
+  if (!token) throw new Error('Connect Google Drive first.');
+
+  const response = await fetch('https://www.googleapis.com/drive/v3' + path, {
+    ...options,
+    headers: {
+      Authorization: 'Bearer ' + token,
+      ...(options.headers || {})
+    }
+  });
+
+  if (response.status === 401) {
+    token = null;
+    throw new Error('Your Google access expired. Connect Google Drive again.');
   }
 
-  // ربط واستعراض Google Drive باستعمال Picker API
-  function connectGoogleDrive() {
-    const client = google.accounts.oauth2.initTokenClient({
-      client_id: CLIENT_ID,
-      scope: 'https://www.googleapis.com/auth/drive.readonly',
-      callback: (response) => {
-        if (response.access_token) {
-          accessToken = response.access_token;
-          gapi.load('picker', createPicker);
+  if (!response.ok) {
+    const details = await response.text();
+    throw new Error('Google Drive error (' + response.status + '): ' + details);
+  }
+
+  if (response.status === 204) return null;
+  return response.json();
+}
+
+function queryValue(value) {
+  return "'" + value.replace(/\\/g, '\\\\').replace(/'/g, "\\'") + "'";
+}
+
+async function loadFolder() {
+  try {
+    if (!token) {
+      status('Connect Google Drive first.');
+      return;
+    }
+
+    status('Loading folder...');
+    const query = encodeURIComponent(
+      queryValue(currentFolder) + ' in parents and trashed = false'
+    );
+
+    const result = await driveRequest(
+      '/files?q=' + query +
+      '&pageSize=1000&orderBy=folder,name' +
+      '&fields=files(id,name,mimeType,size,parents,webViewLink)'
+    );
+
+    currentFiles = result.files || [];
+    selected.clear();
+    renderFiles();
+
+    const crumbs = ['My Drive', ...folderStack.map(x => x.name)];
+    document.getElementById('crumb').textContent = crumbs.join(' / ');
+    status('Loaded ' + currentFiles.length + ' items.');
+  } catch (error) {
+    status(error.message);
+  }
+}
+
+function renderFiles() {
+  const container = document.getElementById('files');
+  container.replaceChildren();
+
+  if (!currentFiles.length) {
+    container.textContent = 'This folder is empty.';
+    return;
+  }
+
+  for (const file of currentFiles) {
+    const isFolder = file.mimeType === 'application/vnd.google-apps.folder';
+    const row = document.createElement('div');
+    row.className = 'file';
+
+    const checkbox = document.createElement('input');
+    checkbox.type = 'checkbox';
+    checkbox.checked = selected.has(file.id);
+    checkbox.setAttribute('aria-label', 'Select ' + file.name);
+    checkbox.onchange = () => {
+      if (checkbox.checked) selected.set(file.id, file);
+      else selected.delete(file.id);
+    };
+
+    const name = document.createElement('span');
+    name.className = 'file-name';
+    name.textContent = (isFolder ? '📁 ' : '📄 ') + file.name;
+    name.title = file.name;
+
+    if (isFolder) {
+      name.onclick = () => {
+        folderStack.push({id: currentFolder, name: file.name});
+        currentFolder = file.id;
+        loadFolder();
+      };
+    }
+
+    const size = document.createElement('small');
+    size.textContent = file.size ? formatBytes(Number(file.size)) : (isFolder ? 'Folder' : 'Google file');
+
+    row.append(checkbox, name, size);
+    container.append(row);
+  }
+}
+
+function goBack() {
+  if (!folderStack.length) {
+    status('You are already at My Drive.');
+    return;
+  }
+
+  currentFolder = folderStack.pop().id;
+  loadFolder();
+}
+
+function clearSelection() {
+  selected.clear();
+  renderFiles();
+  status('Selection cleared.');
+}
+
+function copySelected() {
+  if (!selected.size) {
+    status('Select at least one file first.');
+    return;
+  }
+
+  clipboard = [...selected.values()]
+    .filter(file => file.mimeType !== 'application/vnd.google-apps.folder');
+
+  status('Copied ' + clipboard.length + ' file(s) to the app clipboard. Open the destination folder and choose Paste here.');
+}
+
+async function pasteHere() {
+  if (!clipboard.length) {
+    status('Copy one or more files first.');
+    return;
+  }
+
+  if (!confirm('Create copies of ' + clipboard.length + ' file(s) in this folder?')) return;
+
+  try {
+    let count = 0;
+
+    for (const file of clipboard) {
+      await driveRequest('/files/' + encodeURIComponent(file.id) + '/copy', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({
+          name: file.name,
+          parents: [currentFolder]
+        })
+      });
+      count++;
+      status('Copied ' + count + ' of ' + clipboard.length + ' file(s)...');
+    }
+
+    status('Copy complete.');
+    await loadFolder();
+  } catch (error) {
+    status(error.message);
+  }
+}
+
+async function moveSelected() {
+  const files = [...selected.values()].filter(
+    file => file.mimeType !== 'application/vnd.google-apps.folder'
+  );
+
+  if (!files.length) {
+    status('Select at least one file to move.');
+    return;
+  }
+
+  if (!confirm('Move ' + files.length + ' original file(s) into this folder?')) return;
+
+  try {
+    for (const file of files) {
+      const parents = file.parents || [];
+
+      if (parents.includes(currentFolder)) continue;
+
+      const params = new URLSearchParams({addParents: currentFolder});
+      if (parents.length) params.set('removeParents', parents.join(','));
+
+      await driveRequest(
+        '/files/' + encodeURIComponent(file.id) + '?' + params.toString(),
+        {
+          method: 'PATCH',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({})
         }
-      },
+      );
+    }
+
+    status('Move operation finished.');
+    await loadFolder();
+  } catch (error) {
+    status(error.message);
+  }
+}
+
+async function createFolder() {
+  const name = prompt('Enter the new folder name:');
+  if (!name || !name.trim()) return;
+
+  try {
+    await driveRequest('/files', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({
+        name: name.trim(),
+        mimeType: 'application/vnd.google-apps.folder',
+        parents: [currentFolder]
+      })
     });
-    client.requestAccessToken();
+
+    status('Folder created.');
+    await loadFolder();
+  } catch (error) {
+    status(error.message);
   }
+}
 
-  function createPicker() {
-    if (!accessToken) return;
-    const view = new google.picker.View(google.picker.ViewId.DOCS);
-    view.setMimeTypes("*/*");
-
-    const picker = new google.picker.PickerBuilder()
-      .addView(view)
-      .setOAuthToken(accessToken)
-      .setCallback(pickerCallback)
-      .build();
-    picker.setVisible(true);
+function uploadFiles() {
+  if (!token) {
+    status('Connect Google Drive first.');
+    return;
   }
+  document.getElementById('uploadInput').click();
+}
 
-  function pickerCallback(data) {
-    if (data.action === google.picker.Action.PICKED) {
-      const doc = data.docs[0];
-      const fileListDiv = document.getElementById('fileList');
-      fileListDiv.innerHTML = `
-        <div class="file-item">
-          <div class="file-info">
-            <span class="file-icon">☁️</span>
-            <span>${doc.name}</span>
-          </div>
-          <span style="font-size: 12px; color: #64b5f6;">Google Drive File</span>
-        </div>
-      `;
-      showStatus(`تم اختيار الملف من Google Drive: ${doc.name}`);
+async function uploadChosenFiles(event) {
+  const files = [...event.target.files];
+  event.target.value = '';
+  if (!files.length) return;
+
+  try {
+    for (let i = 0; i < files.length; i++) {
+      const file = files[i];
+      status('Uploading ' + (i + 1) + ' of ' + files.length + ': ' + file.name);
+
+      const start = await fetch(
+        'https://www.googleapis.com/upload/drive/v3/files?uploadType=resumable&fields=id,name,mimeType',
+        {
+          method: 'POST',
+          headers: {
+            Authorization: 'Bearer ' + token,
+            'Content-Type': 'application/json',
+            'X-Upload-Content-Type': file.type || 'application/octet-stream',
+            'X-Upload-Content-Length': String(file.size)
+          },
+          body: JSON.stringify({
+            name: file.name,
+            parents: [currentFolder]
+          })
+        }
+      );
+
+      if (!start.ok) throw new Error('Could not start upload: ' + await start.text());
+
+      const uploadUrl = start.headers.get('Location');
+      if (!uploadUrl) throw new Error('Google did not return an upload URL.');
+
+      const finish = await fetch(uploadUrl, {
+        method: 'PUT',
+        headers: {'Content-Type': file.type || 'application/octet-stream'},
+        body: file
+      });
+
+      if (!finish.ok) throw new Error('Upload failed: ' + await finish.text());
     }
-  }
 
-  async function pickFileToCopy() {
-    try {
-      [storedFileToCopy] = await window.showOpenFilePicker();
-      if (storedFileToCopy) {
-        document.getElementById('pasteBtn').disabled = false;
-        showStatus(`تم نسخ الملف: ${storedFileToCopy.name}. اضغطي Paste لتحديد المجلد المستهدف.`);
-      }
-    } catch (err) {
-      document.getElementById('fallbackFileInput').click();
+    status('Upload complete.');
+    await loadFolder();
+  } catch (error) {
+    status(error.message);
+  }
+}
+
+function formatBytes(bytes) {
+  if (!Number.isFinite(bytes) || bytes < 0) return '';
+  if (bytes === 0) return '0 B';
+  const units = ['B', 'KB', 'MB', 'GB', 'TB'];
+  const index = Math.min(Math.floor(Math.log(bytes) / Math.log(1024)), units.length - 1);
+  return (bytes / Math.pow(1024, index)).toFixed(2) + ' ' + units[index];
+}
+
+function bytesFromSize(value, unit) {
+  const multipliers = {
+    bit: 1 / 8,
+    B: 1,
+    KB: 1024,
+    MB: 1024 ** 2,
+    GB: 1024 ** 3,
+    TB: 1024 ** 4
+  };
+  return Math.floor(value * multipliers[unit]);
+}
+
+async function splitLocalFile() {
+  try {
+    if (!window.showOpenFilePicker || !window.showDirectoryPicker) {
+      status('This feature requires a supported browser such as desktop Microsoft Edge or Chrome.');
+      return;
     }
-  }
 
-  async function pickFolderAndPaste() {
-    if (!storedFileToCopy) return;
-    try {
-      const destinationDirHandle = await window.showDirectoryPicker();
-      if (destinationDirHandle) {
-        const file = await storedFileToCopy.getFile();
-        const newFileHandle = await destinationDirHandle.getFileHandle(`copy_${file.name}`, { create: true });
-        const writable = await newFileHandle.createWritable();
-        await writable.write(file);
-        await writable.close();
-        
-        showStatus(`تم لصق الملف بنجاح باسم: copy_${file.name}`);
-      }
-    } catch (err) {
-      showStatus("تعذر الوصول إلى المجلد المحدد للحفظ.");
+    const [handle] = await window.showOpenFilePicker();
+    const file = await handle.getFile();
+    const value = Number(document.getElementById('partSize').value);
+    const unit = document.getElementById('partUnit').value;
+    const chunkSize = bytesFromSize(value, unit);
+
+    if (!Number.isFinite(value) || value <= 0 || chunkSize < 1) {
+      status('Enter a valid part size.');
+      return;
     }
-  }
 
-  async function splitSelectedFile() {
-    try {
-      const [fileHandle] = await window.showOpenFilePicker();
-      const file = await fileHandle.getFile();
-      const destinationDirHandle = await window.showDirectoryPicker();
-      
-      const sizeValue = parseFloat(document.getElementById('chunkSize').value);
-      const unit = document.getElementById('unitSelect').value;
+    const destination = await window.showDirectoryPicker();
+    const total = Math.ceil(file.size / chunkSize);
 
-      let chunkSizeInBytes = sizeValue;
-      if (unit === 'bit') chunkSizeInBytes = sizeValue / 8;
-      else if (unit === 'B') chunkSizeInBytes = sizeValue;
-      else if (unit === 'KB') chunkSizeInBytes = sizeValue * 1024;
-      else if (unit === 'MB') chunkSizeInBytes = sizeValue * 1024 * 1024;
-      else if (unit === 'GB') chunkSizeInBytes = sizeValue * 1024 * 1024 * 1024;
-      else if (unit === 'TB') chunkSizeInBytes = sizeValue * 1024 * 1024 * 1024 * 1024;
-
-      let chunkOffset = 0;
-      let partNum = 1;
-
-      showStatus("جاري تقسيم الملف وحفظ الأجزاء...");
-
-      while (chunkOffset < file.size) {
-        const chunk = file.slice(chunkOffset, chunkOffset + chunkSizeInBytes);
-        const partName = `${file.name}.part${String(partNum).padStart(3, '0')}`;
-        
-        const partHandle = await destinationDirHandle.getFileHandle(partName, { create: true });
-        const writable = await partHandle.createWritable();
-        await writable.write(chunk);
-        await writable.close();
-
-        chunkOffset += chunkSizeInBytes;
-        partNum++;
-      }
-
-      showStatus(`تم تقسيم الملف بنجاح إلى ${partNum - 1} أجزاء!`);
-    } catch (err) {
-      console.log('تم إلغاء عملية التقسيم');
-    }
-  }
-
-  async function mergeSelectedFiles() {
-    try {
-      const currentDirHandle = await window.showDirectoryPicker();
-      const fileEntries = [];
-      for await (const entry of currentDirHandle.values()) {
-        fileEntries.push(entry);
-      }
-
-      const partEntries = fileEntries.filter(e => e.kind === 'file' && /\.part\d+$/i.test(e.name));
-      if (!partEntries.length) return alert("لم يتم العثور على أجزاء (.part) في المجلد المحدد!");
-
-      partEntries.sort((a, b) => a.name.localeCompare(b.name));
-      showStatus("جاري دمج الأجزاء...");
-
-      let originalName = partEntries[0].name.replace(/\.part\d+$/i, '');
-      const mergedHandle = await currentDirHandle.getFileHandle(`merged_${originalName}`, { create: true });
-      const writable = await mergedHandle.createWritable();
-
-      for (const entry of partEntries) {
-        const file = await entry.getFile();
-        await writable.write(file);
-      }
+    for (let i = 0; i < total; i++) {
+      const start = i * chunkSize;
+      const end = Math.min(start + chunkSize, file.size);
+      const partName = file.name + '.part' + String(i + 1).padStart(3, '0');
+      const partHandle = await destination.getFileHandle(partName, {create: true});
+      const writable = await partHandle.createWritable();
+      await writable.write(file.slice(start, end));
       await writable.close();
 
-      showStatus(`تم دمج الأجزاء بنجاح بالملف: merged_${originalName}`);
-    } catch (err) {
-      console.log('تم إلغاء عملية الدمج');
+      status('Splitting: ' + (i + 1) + ' of ' + total + ' parts...');
     }
-  }
-</script>
 
+    status('Split complete: created ' + total + ' part(s).');
+  } catch (error) {
+    if (error.name !== 'AbortError') status(error.message);
+  }
+}
+
+async function mergeLocalParts() {
+  try {
+    if (!window.showDirectoryPicker) {
+      status('This feature requires desktop Microsoft Edge or Chrome.');
+      return;
+    }
+
+    const folder = await window.showDirectoryPicker();
+    const entries = [];
+
+    for await (const entry of folder.values()) {
+      if (entry.kind === 'file' && /\.part\d+$/i.test(entry.name)) {
+        entries.push(entry);
+      }
+    }
+
+    entries.sort((a, b) => {
+      const na = Number((a.name.match(/\.part(\d+)$/i) || [,'0'])[1]);
+      const nb = Number((b.name.match(/\.part(\d+)$/i) || [,'0'])[1]);
+      return na - nb;
+    });
+
+    if (!entries.length) {
+      status('No .part001, .part002, ... files found in this folder.');
+      return;
+    }
+
+    const baseName = entries[0].name.replace(/\.part\d+$/i, '');
+    const outputName = 'merged_' + baseName;
+    const outputHandle = await folder.getFileHandle(outputName, {create: true});
+    const writable = await outputHandle.createWritable();
+
+    for (let i = 0; i < entries.length; i++) {
+      const part = await entries[i].getFile();
+      await writable.write(part);
+      status('Merging: ' + (i + 1) + ' of ' + entries.length + ' parts...');
+    }
+
+    await writable.close();
+    status('Merge complete: ' + outputName);
+  } catch (error) {
+    if (error.name !== 'AbortError') status(error.message);
+  }
+}
+</script>
 </body>
 </html>
+```
